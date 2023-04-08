@@ -1,12 +1,15 @@
+import 'package:chronos/data/model/week.dart';
+import 'package:chronos/data/repositories/weeks.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TimeNow {
-  List<Map<String, dynamic>> initializeWeeks(int year) {
-    return getWeeksForRange(DateTime.utc(year, 1, 1), DateTime.utc(year+1, 1, 1));
+  Weeks initializeWeeks(int year) {
+    return getWeeksForRange(
+        DateTime.utc(year, 1, 1), DateTime.utc(year + 1, 1, 1));
   }
 
-  List<Map<String, dynamic>> getWeeksForRange(DateTime start, DateTime end) {
+  Weeks getWeeksForRange(DateTime start, DateTime end) {
     var date = start;
     DateTime monday;
     DateTime sunday;
@@ -16,7 +19,7 @@ class TimeNow {
       monday = date;
     }
 
-    List<Map<String, dynamic>> weeks = [];
+    Weeks weekObject = Weeks();
 
     while (date.difference(end).inDays <= 0) {
       if (date.weekday == 1) {
@@ -25,17 +28,16 @@ class TimeNow {
 
       if (date.weekday == 7) {
         sunday = date;
-        weeks.add({
-          'monday': monday,
-          'sunday': sunday,
-          'week':
-              "Week ${monday.day.toString().padLeft(2, '0')} - ${sunday.day.toString().padLeft(2, '0')}",
-          'selected' : false
-        });
+        weekObject.weeks.add(Week(
+            monday: monday,
+            sunday: sunday,
+            selected: false,
+            week:
+                "Week ${monday.day.toString().padLeft(2, '0')} - ${sunday.day.toString().padLeft(2, '0')}"));
       }
       date = date.add(const Duration(days: 1));
     }
 
-    return weeks;
+    return weekObject;
   }
 }

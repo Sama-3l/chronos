@@ -1,13 +1,20 @@
 // ignore_for_file: prefer_const_constructors, empty_constructor_bodies
 
 import 'package:chronos/constants/colors.dart';
+import 'package:chronos/data/model/week.dart';
 import 'package:flutter/material.dart';
 
 class DayOfWeek extends SliverPersistentHeaderDelegate {
-  DayOfWeek({required this.maxheight, required this.minheight});
+  DayOfWeek(
+      {required this.maxheight,
+      required this.minheight,
+      required this.thisWeek,
+      required this.currentWeekMap});
 
   double maxheight;
   double minheight;
+  Week currentWeekMap;
+  List<Widget> thisWeek;
   PrimaryColors col = PrimaryColors();
 
   @override
@@ -21,7 +28,10 @@ class DayOfWeek extends SliverPersistentHeaderDelegate {
             child: Container(
                 decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(10))),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Center(child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: thisWeek))),
           )),
     );
   }
