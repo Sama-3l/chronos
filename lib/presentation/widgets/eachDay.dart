@@ -28,8 +28,8 @@ class Day extends StatelessWidget {
   Widget build(BuildContext context) {
     return selected
         ? SizedBox(
-            height: (MediaQuery.of(context).size.width - 26) / 7,
-            width: (MediaQuery.of(context).size.width - 26) / 7,
+            height: (MediaQuery.of(context).size.width - 30) / 7,
+            width: (MediaQuery.of(context).size.width - 30) / 7,
             child: TextButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
@@ -55,8 +55,8 @@ class Day extends StatelessWidget {
                   ]),
             ))
         : SizedBox(
-            height: (MediaQuery.of(context).size.width - 26) / 7,
-            width: (MediaQuery.of(context).size.width - 26) / 7,
+            height: (MediaQuery.of(context).size.width - 30) / 7,
+            width: (MediaQuery.of(context).size.width - 30) / 7,
             child: TextButton(
               onPressed: () {
                 selectedDay!.selectedDay = dateTime;

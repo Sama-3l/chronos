@@ -21,6 +21,8 @@ class ListOfWeeks extends StatelessWidget {
   final PrimaryColors col;
   SelectedDay selectedDay;
   bool changeMonth = false;
+  Alignment alignment = Alignment(-1, -1);
+  late DateTime monthDateTime;
 
   @override
   Widget build(BuildContext context) {
@@ -31,16 +33,41 @@ class ListOfWeeks extends StatelessWidget {
           child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
-                if (weekObject.weeks[index].monday.month != 12) {
-                  if ((weekObject.weeks[index].monday.month -
-                          weekObject.weeks[index - 1].monday.month !=
-                      0)) {
+                if (index == 0) {
+                  changeMonth = true;
+                  monthDateTime = weekObject.weeks[index].monday;
+                  alignment = Alignment(-1, -1);
+                } else {
+                  if (weekObject.weeks[index].sunday.month -
+                          weekObject.weeks[index].monday.month !=
+                      0) {
                     changeMonth = true;
+                    monthDateTime = DateTime(
+                        weekObject.weeks[index].monday.year,
+                        weekObject.weeks[index].monday.month + 1,
+                        weekObject.weeks[index].monday.day);
+                    alignment = Alignment(1, -1);
+                  } else if (weekObject.weeks[index].sunday.month -
+                          weekObject.weeks[index].sunday.month !=
+                      0) {
+                    changeMonth = true;
+                    monthDateTime = weekObject.weeks[index].monday;
+                    alignment = Alignment(-1, -1);
+                  } else if (weekObject.weeks[index].monday.month -
+                          weekObject.weeks[index - 1].sunday.month !=
+                      0) {
+                    changeMonth = true;
+                    monthDateTime = weekObject.weeks[index].monday;
+                    alignment = Alignment(-1, -1);
+                  } else if (weekObject.weeks[index].sunday.month -
+                          weekObject.weeks[index - 1].sunday.month !=
+                      0) {
+                    changeMonth = true;
+                    monthDateTime = weekObject.weeks[index].monday;
+                    alignment = Alignment(-1, -1);
                   } else {
                     changeMonth = false;
                   }
-                } else {
-                  changeMonth = true;
                 }
                 return Padding(
                   padding: EdgeInsets.all(4),
@@ -62,12 +89,14 @@ class ListOfWeeks extends StatelessWidget {
                           child: AspectRatio(
                             aspectRatio: 3.85,
                             child: changeMonth
-                                ? AutoSizeText(
-                                    DateFormat.MMM()
-                                        .format(weekObject.weeks[index].monday),
-                                    style: GoogleFonts.questrial(
-                                        fontSize: 17,
-                                        color: col.whiteTextColor))
+                                ? Align(
+                                    alignment: alignment,
+                                    child: AutoSizeText(
+                                        DateFormat.MMM().format(monthDateTime),
+                                        style: GoogleFonts.questrial(
+                                            fontSize: 17,
+                                            color: col.whiteTextColor)),
+                                  )
                                 : Container(),
                           ),
                         )),

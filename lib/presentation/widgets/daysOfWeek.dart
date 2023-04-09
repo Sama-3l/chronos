@@ -29,9 +29,12 @@ class DayOfWeek extends SliverPersistentHeaderDelegate {
                 decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10)),
-                child: Center(child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: thisWeek))),
+                child: Center(child: Padding(
+                  padding: const EdgeInsets.only(left: 2, right: 2),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: thisWeek),
+                ))),
           )),
     );
   }

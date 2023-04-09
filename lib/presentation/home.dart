@@ -41,6 +41,9 @@ class _HomePageState extends State<HomePage> {
   late SelectedDay selectedDay;
   late int initialWeekIndex;
 
+  DateTime todayDateTimeObject =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+
   void selectedWeek(SelectedDay? setDay) {
     weekDays = [];
     DateTime date = weekObject.weeks[weekSelectedIndex].monday;
@@ -90,17 +93,19 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    weekObject = time.initializeWeeks(DateTime.now().year);
+    weekObject = time.initializeWeeks(todayDateTimeObject);
     for (int i = 0; i < weekObject.weeks.length; i++) {
-      if (weekObject.weeks[i].monday.compareTo(DateTime.now()) <= 0 &&
-          weekObject.weeks[i].sunday.compareTo(DateTime.now()) >= 0) {
+      if (weekObject.weeks[i].monday.difference(todayDateTimeObject).inDays <=
+              0 &&
+          weekObject.weeks[i].sunday.difference(todayDateTimeObject).inDays >=
+              0) {
         weekObject.weeks[i].selected = true;
         weekSelectedIndex = i;
       }
     }
     initialWeekIndex = weekSelectedIndex;
     selectedDay = SelectedDay(
-        selectedDay: DateTime.now(), selectedWeekIndex: weekSelectedIndex);
+        selectedDay: todayDateTimeObject, selectedWeekIndex: weekSelectedIndex);
     taskList.add(TaskCard(tagColor: tag.darkPurpleTag));
     taskList.add(TaskCard(tagColor: tag.lightGreenTag));
     taskList.add(TaskCard(tagColor: tag.blueTag));
@@ -122,7 +127,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   String checkTodayStatus() {
-    if (selectedDay.selectedDay.difference(DateTime.now()).inDays == 0) {
+    if (selectedDay.selectedDay.difference(todayDateTimeObject).inDays == 0) {
       return "Today";
     } else {
       return "Selected";
@@ -143,26 +148,25 @@ class _HomePageState extends State<HomePage> {
             appBar: AppBar(
                 title: Row(
                   children: [
-                    AutoSizeText(
-                        DateFormat.MMMMd().format(selectedDay.selectedDay),
-                        minFontSize: 12,
-                        style: GoogleFonts.questrial(
-                            fontSize: 23, color: col.whiteTextColor)),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, right: 8),
-                      child: Container(
-                        height: 8,
-                        width: 8,
-                        decoration: BoxDecoration(
-                            color: col.dotColor,
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                          DateFormat.MMMMd().format(selectedDay.selectedDay),
+                          style: GoogleFonts.questrial(
+                              fontSize: 19, color: col.whiteTextColor)),
+                    ),
+                    Container(
+                      height: 4,
+                      width: 4,
+                      decoration: BoxDecoration(
+                          color: col.dotColor,
+                          borderRadius: BorderRadius.circular(10)),
                     ),
                     TextButton(
                       onPressed: () {
                         weekObject.weeks[selectedDay.selectedWeekIndex]
                             .selected = false;
-                        selectedDay.selectedDay = DateTime.now();
+                        selectedDay.selectedDay = todayDateTimeObject;
                         selectedDay.selectedWeekIndex = initialWeekIndex;
                         weekObject.weeks[initialWeekIndex].selected = true;
                         selectedDay.selectedWeekIndex = initialWeekIndex;
@@ -173,7 +177,7 @@ class _HomePageState extends State<HomePage> {
                         fit: BoxFit.fitWidth,
                         child: Text(checkTodayStatus(),
                             style: GoogleFonts.questrial(
-                              fontSize: 23,
+                                fontSize: 19,
                                 color: col.whiteTextColor.withOpacity(0.7))),
                       ),
                     ),

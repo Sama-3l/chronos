@@ -1,12 +1,14 @@
+import 'package:chronos/data/model/reminder.dart';
 import 'package:chronos/data/model/week.dart';
+import 'package:chronos/data/repositories/allReminders.dart';
 import 'package:chronos/data/repositories/weeks.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TimeNow {
-  Weeks initializeWeeks(int year) {
-    return getWeeksForRange(
-        DateTime.utc(year, 1, 1), DateTime.utc(year + 1, 1, 1));
+  Weeks initializeWeeks(DateTime start) {
+    return getWeeksForRange(DateTime.utc(start.year, start.month, start.day),
+        DateTime.utc(start.year + 1, start.month, start.day));
   }
 
   Weeks getWeeksForRange(DateTime start, DateTime end) {
@@ -32,6 +34,7 @@ class TimeNow {
             monday: monday,
             sunday: sunday,
             selected: false,
+            reminders: Reminders(allReminders: [Reminder()]),
             week:
                 "Week ${monday.day.toString().padLeft(2, '0')} - ${sunday.day.toString().padLeft(2, '0')}"));
       }
