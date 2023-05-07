@@ -43,13 +43,13 @@ class Day extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: AutoSizeText(days[index],
-                          // minFontSize: 2,
+                          // minFontSize: 13,
                           maxFontSize: 13,
                           style:
                               GoogleFonts.questrial(color: col.whiteTextColor)),
                     ),
                     AutoSizeText(date,
-                        // minFontSize: 12,
+                        // minFontSize: 23,
                         maxFontSize: 23,
                         style: GoogleFonts.questrial(color: col.whiteTextColor))
                   ]),

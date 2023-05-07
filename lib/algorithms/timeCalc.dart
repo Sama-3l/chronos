@@ -34,7 +34,7 @@ class TimeNow {
             monday: monday,
             sunday: sunday,
             selected: false,
-            reminders: Reminders(allReminders: [Reminder()]),
+            reminders: null,
             week:
                 "Week ${monday.day.toString().padLeft(2, '0')} - ${sunday.day.toString().padLeft(2, '0')}"));
       }

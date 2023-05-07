@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class TaskCard extends StatelessWidget {
   TaskCard({super.key, required this.tagColor});
 
-  Color tagColor;
+  Color? tagColor;
 
   @override
   Widget build(BuildContext context) {

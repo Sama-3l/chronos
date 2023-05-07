@@ -13,7 +13,7 @@ class Week {
   DateTime sunday;
   String week;
   bool selected;
-  Reminders reminders;
+  Reminders? reminders;
 
   Map toJson(){
     return {

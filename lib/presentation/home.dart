@@ -1,9 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:chronos/algorithms/methods.dart';
 import 'package:chronos/algorithms/timeCalc.dart';
 import 'package:chronos/constants/colors.dart';
+import 'package:chronos/constants/icons.dart';
+import 'package:chronos/data/model/reminder.dart';
 import 'package:chronos/data/model/selectedDay.dart';
 import 'package:chronos/data/model/week.dart';
+import 'package:chronos/data/repositories/allReminders.dart';
 import 'package:chronos/data/repositories/weeks.dart';
 import 'package:chronos/presentation/widgets/daysOfWeek.dart';
 import 'package:chronos/presentation/widgets/listOfWeeks.dart';
@@ -13,6 +17,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:intl/intl.dart';
 
 import '../business_logic/blocs/bloc/change_week_bloc.dart';
@@ -26,14 +31,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final ScrollController _controller = ScrollController();
   PrimaryColors col = PrimaryColors();
   TimeNow time = TimeNow();
   TagColors tag = TagColors();
-
   Weeks weekObject = Weeks();
+  Reminders? allReminders;
+  Methods func = Methods();
+
   List<Widget> taskList = [];
   int weekSelectedIndex = 0;
-  final ScrollController _controller = ScrollController();
   bool sliverPersistentHeader = false;
   List<Widget> weekDays = [];
   List<String> selectedDays = [];
@@ -44,74 +51,18 @@ class _HomePageState extends State<HomePage> {
   DateTime todayDateTimeObject =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
-  void selectedWeek(SelectedDay? setDay) {
-    weekDays = [];
-    DateTime date = weekObject.weeks[weekSelectedIndex].monday;
-    DateTime end = weekObject.weeks[weekSelectedIndex].sunday;
-    bool selected = false;
-    while (date.difference(end).inDays <= 0) {
-      if (DateUtils.isSameDay(date, setDay!.selectedDay)) {
-        selected = true;
-      } else {
-        selected = false;
-      }
-
-      if (date.weekday == 1) {
-        weekDays.add(Padding(
-          padding: const EdgeInsets.only(left: 0),
-          child: Day(
-              date: date.day.toString().padLeft(2, '0'),
-              index: date.weekday - 1,
-              selected: selected,
-              dateTime: date,
-              selectedDay: selectedDay),
-        ));
-      } else if (date.weekday == 7) {
-        weekDays.add(Padding(
-          padding: const EdgeInsets.only(right: 0),
-          child: Day(
-              date: date.day.toString().padLeft(2, '0'),
-              index: date.weekday - 1,
-              selected: selected,
-              dateTime: date,
-              selectedDay: selectedDay),
-        ));
-      } else {
-        weekDays.add(Day(
-          date: date.day.toString().padLeft(2, '0'),
-          index: date.weekday - 1,
-          selected: selected,
-          dateTime: date,
-          selectedDay: selectedDay,
-        ));
-      }
-      if (date.weekday != 7) weekDays.add(Spacer());
-      date = date.add(const Duration(days: 1));
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
+  void initialize() {
     weekObject = time.initializeWeeks(todayDateTimeObject);
-    for (int i = 0; i < weekObject.weeks.length; i++) {
-      if (weekObject.weeks[i].monday.difference(todayDateTimeObject).inDays <=
-              0 &&
-          weekObject.weeks[i].sunday.difference(todayDateTimeObject).inDays >=
-              0) {
-        weekObject.weeks[i].selected = true;
-        weekSelectedIndex = i;
-      }
-    }
     initialWeekIndex = weekSelectedIndex;
     selectedDay = SelectedDay(
         selectedDay: todayDateTimeObject, selectedWeekIndex: weekSelectedIndex);
-    taskList.add(TaskCard(tagColor: tag.darkPurpleTag));
-    taskList.add(TaskCard(tagColor: tag.lightGreenTag));
-    taskList.add(TaskCard(tagColor: tag.blueTag));
-    taskList.add(TaskCard(tagColor: tag.blueTag));
-    taskList.add(TaskCard(tagColor: tag.blueTag));
-    taskList.add(TaskCard(tagColor: tag.blueTag));
+    weekObject.weeks[weekSelectedIndex].selected = true;
+    // taskList.add(TaskCard(tagColor: tag.darkPurpleTag));
+    // taskList.add(TaskCard(tagColor: tag.lightGreenTag));
+    // taskList.add(TaskCard(tagColor: tag.blueTag));
+    // taskList.add(TaskCard(tagColor: tag.blueTag));
+    // taskList.add(TaskCard(tagColor: tag.blueTag));
+    // taskList.add(TaskCard(tagColor: tag.blueTag));
     _controller.addListener(() {
       if (_controller.position.userScrollDirection == ScrollDirection.reverse) {
         setState(() {
@@ -123,15 +74,56 @@ class _HomePageState extends State<HomePage> {
         });
       }
     });
-    selectedWeek(selectedDay);
+    weekDays = func.selectedWeek(
+        selectedDay, weekObject, weekSelectedIndex, selectedDay);
+    allReminders = Reminders(allReminders: [
+      Reminder(
+          isDescriptive: true,
+          tag1: "Financial",
+          tag2: "Exchange",
+          deadline: DateTime(2023, 5, 2),
+          color: tag.darkPurpleTag),
+      Reminder(
+          isDescriptive: true,
+          tag1: "Assignment",
+          tag2: "Heat",
+          deadline: DateTime(2023, 5, 2),
+          color: tag.lightGreenTag)
+    ]);
+
+    for (int i = 0; i < allReminders!.allReminders.length; i++) {
+      if (weekObject
+              .weeks[func.calculateWeekIndex(
+                  allReminders!.allReminders[i].deadline,
+                  weekObject.weeks[0].sunday)]
+              .reminders ==
+          null) {
+        weekObject
+                .weeks[func.calculateWeekIndex(
+                    allReminders!.allReminders[i].deadline,
+                    weekObject.weeks[0].sunday)]
+                .reminders =
+            Reminders(allReminders: [allReminders!.allReminders[i]]);
+      } else {
+        weekObject
+            .weeks[func.calculateWeekIndex(
+                allReminders!.allReminders[i].deadline,
+                weekObject.weeks[0].sunday)]
+            .reminders!
+            .allReminders
+            .add(allReminders!.allReminders[i]);
+      }
+    }
+    print(weekObject
+        .weeks[
+            func.calculateWeekIndex(DateTime.now(), weekObject.weeks[0].sunday)]
+        .monday);
   }
 
-  String checkTodayStatus() {
-    if (selectedDay.selectedDay.difference(todayDateTimeObject).inDays == 0) {
-      return "Today";
-    } else {
-      return "Selected";
-    }
+  @override
+  void initState() {
+    super.initState();
+    initialize();
   }
 
   @override
@@ -141,7 +133,10 @@ class _HomePageState extends State<HomePage> {
         if (state is WeekChangeState) {
           selectedDay = state.selectedDay!;
           weekSelectedIndex = selectedDay.selectedWeekIndex;
-          selectedWeek(state.selectedDay);
+          weekDays = func.selectedWeek(
+              state.selectedDay, weekObject, weekSelectedIndex, selectedDay);
+          taskList =
+              func.currentDayTasks(weekObject, weekSelectedIndex, selectedDay);
         }
         return Scaffold(
             backgroundColor: col.appColor,
@@ -175,7 +170,9 @@ class _HomePageState extends State<HomePage> {
                       },
                       child: FittedBox(
                         fit: BoxFit.fitWidth,
-                        child: Text(checkTodayStatus(),
+                        child: Text(
+                            func.checkTodayStatus(
+                                selectedDay, todayDateTimeObject),
                             style: GoogleFonts.questrial(
                                 fontSize: 19,
                                 color: col.whiteTextColor.withOpacity(0.7))),
@@ -221,7 +218,17 @@ class _HomePageState extends State<HomePage> {
                   delegate: SliverChildListDelegate(taskList),
                   itemExtent: MediaQuery.of(context).size.height * 0.28)
             ]),
-            floatingActionButton: FloatingActionButton(onPressed: () {}));
+            floatingActionButton: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.088,
+                width: MediaQuery.of(context).size.height * 0.088,
+                child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(60)),
+                        backgroundColor: col.primaryTextColor),
+                    onPressed: () {},
+                    child: Iconify(addReminder,
+                        size: MediaQuery.of(context).size.height * 0.08))));
       },
     );
   }
