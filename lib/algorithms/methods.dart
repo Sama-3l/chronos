@@ -1,8 +1,12 @@
 // ignore_for_file: non_constant_identifier_names, prefer_const_constructors
 
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:chronos/constants/colors.dart';
+import 'package:chronos/data/model/reminder.dart';
 import 'package:chronos/data/repositories/allReminders.dart';
 import 'package:chronos/data/repositories/weeks.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../data/model/selectedDay.dart';
 import '../data/model/week.dart';
@@ -79,16 +83,5 @@ class Methods {
     }
   }
 
-  List<Widget> currentDayTasks(
-      Weeks weekObject, int weekSelectedIndex, SelectedDay selectedDay) {
-    Week currentWeek = weekObject.weeks[weekSelectedIndex];
-    List<Widget> taskList = [];
-    if (currentWeek.reminders != null) {
-      for (int j = 0; j < currentWeek.reminders!.allReminders.length; j++) {
-        taskList.add(
-            TaskCard(tagColor: currentWeek.reminders!.allReminders[j].color));
-      }
-    }
-    return taskList;
-  }
+  
 }

@@ -44,6 +44,9 @@ dependencies:
   basic_utils: ^5.4.2
   iconify_flutter: ^0.0.5
   intl: ^0.18.0
+  build_runner: ^2.3.3
+  hive_generator: ^1.1.0
+  flutter_switch: ^0.3.2
 
 dev_dependencies:
   flutter_test:

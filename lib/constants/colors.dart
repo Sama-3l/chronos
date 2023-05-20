@@ -16,7 +16,6 @@ class TagColors{
   Color darkPurpleTag = Color(0xff9D6BCE);
   Color lightPurpleTag = Color(0xffB793DA);
   Color yellowTag = Color(0xffF1EFB0);
-  Color greyTag = Color(0xffD9D9D9);
   Color peachTag = Color(0xffC27575);
   Color lightGreenTag = Color(0xffB7D080);
   Color blueTag = Color(0xff4F8BD1);

@@ -2,10 +2,12 @@
 
 import 'package:chronos/algorithms/methods.dart';
 import 'package:chronos/algorithms/timeCalc.dart';
+import 'package:chronos/algorithms/widgetDecider.dart';
 import 'package:chronos/constants/colors.dart';
 import 'package:chronos/constants/icons.dart';
 import 'package:chronos/data/model/reminder.dart';
 import 'package:chronos/data/model/selectedDay.dart';
+import 'package:chronos/data/model/topic.dart';
 import 'package:chronos/data/model/week.dart';
 import 'package:chronos/data/repositories/allReminders.dart';
 import 'package:chronos/data/repositories/weeks.dart';
@@ -38,6 +40,7 @@ class _HomePageState extends State<HomePage> {
   Weeks weekObject = Weeks();
   Reminders? allReminders;
   Methods func = Methods();
+  WidgetDecider wd = WidgetDecider();
 
   List<Widget> taskList = [];
   int weekSelectedIndex = 0;
@@ -57,12 +60,6 @@ class _HomePageState extends State<HomePage> {
     selectedDay = SelectedDay(
         selectedDay: todayDateTimeObject, selectedWeekIndex: weekSelectedIndex);
     weekObject.weeks[weekSelectedIndex].selected = true;
-    // taskList.add(TaskCard(tagColor: tag.darkPurpleTag));
-    // taskList.add(TaskCard(tagColor: tag.lightGreenTag));
-    // taskList.add(TaskCard(tagColor: tag.blueTag));
-    // taskList.add(TaskCard(tagColor: tag.blueTag));
-    // taskList.add(TaskCard(tagColor: tag.blueTag));
-    // taskList.add(TaskCard(tagColor: tag.blueTag));
     _controller.addListener(() {
       if (_controller.position.userScrollDirection == ScrollDirection.reverse) {
         setState(() {
@@ -81,18 +78,55 @@ class _HomePageState extends State<HomePage> {
           isDescriptive: true,
           tag1: "Financial",
           tag2: "Exchange",
-          deadline: DateTime(2023, 5, 2),
+          deadline: DateTime(2023, 5, 16),
+          deadlineType: "on",
+          subtitle: "People",
+          topics: [
+            Topic(description: "Ayush"),
+            Topic(description: "Vedang"),
+            Topic(description: "Shubhanshu"),
+            Topic(description: "Pushkar"),
+          ],
           color: tag.darkPurpleTag),
       Reminder(
           isDescriptive: true,
           tag1: "Assignment",
           tag2: "Heat",
-          deadline: DateTime(2023, 5, 2),
+          deadlineType: "before",
+          subtitle: "Topic",
+          deadline: DateTime(2023, 5, 19),
+          color: tag.lightGreenTag),
+      Reminder(
+          isDescriptive: true,
+          tag1: "Assignment",
+          tag2: "NM",
+          deadlineType: "none",
+          subtitle: "Topic",
+          deadline: DateTime.now(),
+          color: tag.lightGreenTag),
+      Reminder(
+          isDescriptive: true,
+          tag1: "Contact",
+          tag2: "Hritik",
+          deadlineType: "thisWeek",
+          subtitle: "Topic",
+          deadline: DateTime.now(),
           color: tag.lightGreenTag)
     ]);
 
     for (int i = 0; i < allReminders!.allReminders.length; i++) {
-      if (weekObject
+      if (allReminders!.allReminders[i].deadlineType == "none") {
+        for (int j = 0; j < weekObject.weeks.length; j++) {
+          if (weekObject.weeks[j].reminders == null) {
+            weekObject.weeks[j].reminders =
+                Reminders(allReminders: [allReminders!.allReminders[i]]);
+          }
+          else{
+            weekObject.weeks[j].reminders!.allReminders
+              .add(allReminders!.allReminders[i]);
+          }
+        }
+      } else if (weekObject
               .weeks[func.calculateWeekIndex(
                   allReminders!.allReminders[i].deadline,
                   weekObject.weeks[0].sunday)]
@@ -114,10 +148,9 @@ class _HomePageState extends State<HomePage> {
             .add(allReminders!.allReminders[i]);
       }
     }
-    print(weekObject
-        .weeks[
-            func.calculateWeekIndex(DateTime.now(), weekObject.weeks[0].sunday)]
-        .monday);
+    for (int i = 0; i < weekObject.weeks.length; i++) {
+      print(weekObject.weeks[i].reminders);
+    }
   }
 
   @override
@@ -136,7 +169,10 @@ class _HomePageState extends State<HomePage> {
           weekDays = func.selectedWeek(
               state.selectedDay, weekObject, weekSelectedIndex, selectedDay);
           taskList =
-              func.currentDayTasks(weekObject, weekSelectedIndex, selectedDay);
+              wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay);
+        } else {
+          taskList =
+              wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay);
         }
         return Scaffold(
             backgroundColor: col.appColor,
