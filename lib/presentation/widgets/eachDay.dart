@@ -1,4 +1,4 @@
-import 'package:chronos/business_logic/blocs/bloc/change_week_bloc.dart';
+import 'package:chronos/business_logic/blocs/change_week/change_week_bloc.dart';
 import 'package:chronos/constants/colors.dart';
 import 'package:chronos/data/model/selectedDay.dart';
 import 'package:flutter/material.dart';

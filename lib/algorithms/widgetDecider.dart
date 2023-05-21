@@ -2,14 +2,16 @@
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:chronos/constants/colors.dart';
-import 'package:chronos/data/model/reminder.dart';
-import 'package:chronos/data/repositories/allReminders.dart';
-import 'package:chronos/data/repositories/weeks.dart';
+import 'package:chronos/data/model/hive_reminder.dart';
+import 'package:chronos/data/repositories/hive_allReminders.dart';
+import 'package:chronos/data/repositories/hive_weeks.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../business_logic/blocs/change_color/change_color_bloc.dart';
 import '../data/model/selectedDay.dart';
-import '../data/model/week.dart';
+import '../data/model/hive_week.dart';
 import '../presentation/widgets/eachDay.dart';
 import '../presentation/widgets/taskCard.dart';
 
@@ -206,15 +208,44 @@ class WidgetDecider {
     Week currentWeek = weekObject.weeks[weekSelectedIndex];
     List<Widget> taskList = [];
     if (currentWeek.reminders != null) {
-      for (int j = 0; j < currentWeek.reminders!.allReminders.length; j++) {
+      for (int j = 0; j < currentWeek.reminders.allReminders.length; j++) {
         if (checkTodayReminders(
-            currentWeek.reminders!.allReminders[j], selectedDay)) {
+            currentWeek.reminders.allReminders[j], selectedDay)) {
           taskList.add(TaskCard(
-              reminder: currentWeek.reminders!.allReminders[j],
+              reminder: currentWeek.reminders.allReminders[j],
               selectedDay: selectedDay));
         }
       }
     }
     return taskList;
+  }
+
+  List<Widget> getColors(Reminder reminder, TagColors col, BuildContext context) {
+    List<Widget> allColors = [];
+
+    for (int i = 0; i < col.returnColorsList().length; i++) {
+      allColors.add(Expanded(
+        child: GestureDetector(
+          onTap: () {
+            reminder.color = col.returnColorsList()[i];
+            BlocProvider.of<ChangeColorBloc>(context).add(ColorChangesEvent());
+          },
+          child: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Color(0xffffffff), width: 2),
+              color: col.returnColorsList()[i],
+            ),
+            child: col.returnColorsList()[i] == reminder.color
+                ? Icon(Icons.done_rounded, size: 25)
+                : Container(),
+          ),
+        ),
+      ));
+    }
+
+    return allColors;
   }
 }

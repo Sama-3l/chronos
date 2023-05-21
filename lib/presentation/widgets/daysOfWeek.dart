@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors, empty_constructor_bodies
 
 import 'package:chronos/constants/colors.dart';
-import 'package:chronos/data/model/week.dart';
+import 'package:chronos/data/model/hive_week.dart';
 import 'package:flutter/material.dart';
 
 class DayOfWeek extends SliverPersistentHeaderDelegate {

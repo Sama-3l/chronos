@@ -1,6 +1,10 @@
-import 'package:chronos/data/repositories/allReminders.dart';
+import 'package:chronos/data/repositories/hive_allReminders.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
+part 'hive_week.g.dart';
+
+@HiveType(typeId: 4)
 class Week {
   Week(
       {required this.monday,
@@ -9,18 +13,18 @@ class Week {
       required this.week,
       required this.reminders});
 
+  @HiveField(0)
   DateTime monday;
-  DateTime sunday;
-  String week;
-  bool selected;
-  Reminders? reminders;
 
-  Map toJson(){
-    return {
-      'monday' : monday,
-      'sunday' : sunday,
-      'week' : week,
-      'selected' : selected,
-    };
-  }
+  @HiveField(1)
+  DateTime sunday;
+
+  @HiveField(2)
+  String week;
+
+  @HiveField(3)
+  bool selected;
+
+  @HiveField(4)
+  Reminders reminders;
 }

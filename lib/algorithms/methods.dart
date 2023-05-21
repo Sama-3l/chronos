@@ -2,14 +2,15 @@
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:chronos/constants/colors.dart';
-import 'package:chronos/data/model/reminder.dart';
-import 'package:chronos/data/repositories/allReminders.dart';
-import 'package:chronos/data/repositories/weeks.dart';
+import 'package:chronos/data/model/hive_reminder.dart';
+import 'package:chronos/data/repositories/hive_allReminders.dart';
+import 'package:chronos/data/repositories/hive_weeks.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import '../data/model/selectedDay.dart';
-import '../data/model/week.dart';
+import '../data/model/hive_week.dart';
 import '../presentation/widgets/eachDay.dart';
 import '../presentation/widgets/taskCard.dart';
 
@@ -83,5 +84,54 @@ class Methods {
     }
   }
 
-  
+  void initializeWeeklyReminders(Reminders allReminders, Weeks weekObject) {
+    for (int i = 0; i < allReminders.allReminders.length; i++) {
+      if (allReminders.allReminders[i].deadlineType == "none") {
+        for (int j = 0; j < weekObject.weeks.length; j++) {
+          if (weekObject.weeks[j].reminders == null) {
+            weekObject.weeks[j].reminders =
+                Reminders(allReminders: [allReminders.allReminders[i]]);
+          } else {
+            weekObject.weeks[j].reminders.allReminders
+                .add(allReminders.allReminders[i]);
+          }
+        }
+      } else if (weekObject
+              .weeks[calculateWeekIndex(allReminders.allReminders[i].deadline,
+                  weekObject.weeks[0].sunday)]
+              .reminders ==
+          null) {
+        weekObject
+                .weeks[calculateWeekIndex(allReminders.allReminders[i].deadline,
+                    weekObject.weeks[0].sunday)]
+                .reminders =
+            Reminders(allReminders: [allReminders.allReminders[i]]);
+      } else {
+        weekObject
+            .weeks[calculateWeekIndex(allReminders.allReminders[i].deadline,
+                weekObject.weeks[0].sunday)]
+            .reminders
+            .allReminders
+            .add(allReminders.allReminders[i]);
+      }
+    }
+  }
+
+  String getSelectedDate(DateTime selectedDay) {
+    final weekday = DateFormat('EEEE').format(selectedDay);
+    final day = DateFormat('d').format(selectedDay);
+    final month = DateFormat('MMMM').format(selectedDay);
+    final year = DateFormat('y').format(selectedDay);
+
+    return '$weekday $day, $month $year';
+  }
+
+  bool checkOnOrBefore(Reminders currentReminder) {
+    return currentReminder.allReminders[currentReminder.allReminders.length - 1]
+                .deadlineType ==
+            "on" ||
+        currentReminder.allReminders[currentReminder.allReminders.length - 1]
+                .deadlineType ==
+            "before";
+  }
 }

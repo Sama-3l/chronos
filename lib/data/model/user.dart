@@ -1,4 +1,4 @@
-import 'package:chronos/data/repositories/allReminders.dart';
+import 'package:chronos/data/repositories/hive_allReminders.dart';
 import 'package:flutter/material.dart';
 
 class User {

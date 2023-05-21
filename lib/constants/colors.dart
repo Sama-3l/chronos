@@ -20,4 +20,8 @@ class TagColors{
   Color lightGreenTag = Color(0xffB7D080);
   Color blueTag = Color(0xff4F8BD1);
   Color pinkTag = Color(0xffEA9CE7);
+
+  List<Color> returnColorsList(){
+    return [darkPurpleTag, lightPurpleTag, yellowTag, peachTag, lightGreenTag, blueTag, pinkTag];
+  } 
 }

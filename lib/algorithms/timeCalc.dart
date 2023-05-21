@@ -1,7 +1,7 @@
-import 'package:chronos/data/model/reminder.dart';
-import 'package:chronos/data/model/week.dart';
-import 'package:chronos/data/repositories/allReminders.dart';
-import 'package:chronos/data/repositories/weeks.dart';
+import 'package:chronos/data/model/hive_reminder.dart';
+import 'package:chronos/data/model/hive_week.dart';
+import 'package:chronos/data/repositories/hive_allReminders.dart';
+import 'package:chronos/data/repositories/hive_weeks.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -34,7 +34,7 @@ class TimeNow {
             monday: monday,
             sunday: sunday,
             selected: false,
-            reminders: null,
+            reminders: Reminders(allReminders: []),
             week:
                 "Week ${monday.day.toString().padLeft(2, '0')} - ${sunday.day.toString().padLeft(2, '0')}"));
       }

@@ -8,7 +8,7 @@ import 'package:chronos/data/model/selectedDay.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../data/model/reminder.dart';
+import '../../data/model/hive_reminder.dart';
 
 class TaskCard extends StatelessWidget {
   TaskCard({super.key, required this.reminder, required this.selectedDay});
