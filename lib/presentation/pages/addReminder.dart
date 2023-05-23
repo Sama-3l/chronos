@@ -1,8 +1,10 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_conditional_assignment
 
 import 'package:chronos/algorithms/methods.dart';
+import 'package:chronos/algorithms/timeCalc.dart';
 import 'package:chronos/algorithms/widgetDecider.dart';
 import 'package:chronos/business_logic/blocs/change_reminder/change_reminders_bloc.dart';
+import 'package:chronos/data/model/hive_topic.dart';
 import 'package:chronos/data/repositories/hive_weeks.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,10 +12,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
 import '../../business_logic/blocs/change_color/change_color_bloc.dart';
 import '../../business_logic/blocs/change_topics/change_topics_bloc.dart';
+import '../../business_logic/blocs/date_selected/date_selected_bloc.dart';
 import '../../business_logic/blocs/toggle_buttons/toggle_buttons_bloc.dart';
 import '../../constants/colors.dart';
 import '../../data/model/hive_reminder.dart';
@@ -27,12 +31,18 @@ class AddReminderDescriptive extends StatefulWidget {
       required this.currentReminder,
       required this.selectedDay,
       required this.weekObject,
-      required this.initialDate});
+      required this.initialDate,
+      this.reminderIndex = -1,
+      this.weekSelectedIndex = -1,
+      this.weekReminderIndex = -1});
 
   Reminders currentReminder;
   SelectedDay selectedDay;
   Weeks weekObject;
   DateTime initialDate;
+  int reminderIndex;
+  int weekSelectedIndex;
+  int weekReminderIndex;
 
   @override
   State<AddReminderDescriptive> createState() => _AddReminderDescriptiveState();
@@ -42,7 +52,18 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
   @override
   void initState() {
     super.initState();
-    print(widget.currentReminder.allReminders);
+    if (widget.reminderIndex != -1) {
+      editTaskCard = true;
+      tag1Controller.text =
+          widget.currentReminder.allReminders[widget.reminderIndex].tag1;
+      tag2Controller.text =
+          widget.currentReminder.allReminders[widget.reminderIndex].tag2;
+      // if(widget.currentReminder.allReminders[widget.reminderIndex].topics != null){
+      //   for(int i = 0; i < widget.currentReminder.allReminders[widget.reminderIndex].topics!.length; i++){
+      //     topicsController[i].text = widget.currentReminder.allReminders[widget.reminderIndex].topics![i].description;
+      //   }
+      // }
+    }
   }
 
   bool value = false;
@@ -54,6 +75,9 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
   TagColors col = TagColors();
   Methods func = Methods();
   WidgetDecider wd = WidgetDecider();
+  TimeNow time = TimeNow();
+  bool editTaskCard = false;
+  var db = Hive.box('Database');
 
   int intDeadlineType = 0;
   final List<bool> isSelected = [true, false, false, false];
@@ -89,8 +113,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
             ],
           ),
         ));
-      }
-      else {
+      } else {
         topics.add(Padding(
           padding: const EdgeInsets.only(top: 20),
           child: Row(
@@ -121,7 +144,6 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
           ),
         ));
       }
-
 
       if (subtopicsController[i] != null) {
         for (int j = 0; j < subtopicsController[i]!.length; j++) {
@@ -195,28 +217,6 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
     return topics;
   }
 
-  Future<void> _selectDate(BuildContext context, DateTime initialDate) async {
-    DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: widget.selectedDay.selectedDay,
-      firstDate: DateTime(2022),
-      lastDate: DateTime(2024),
-      selectableDayPredicate: (DateTime date) {
-        // Block dates between March 1, 2022, and June 30, 2022
-        return date.isAfter(initialDate);
-      },
-    );
-
-    if (picked != null) {
-      setState(() {
-        widget
-            .currentReminder
-            .allReminders[widget.currentReminder.allReminders.length - 1]
-            .deadline = picked;
-      });
-    }
-  }
-
   void changeToggleButtons(int index) {
     for (int buttonIndex = 0; buttonIndex < isSelected.length; buttonIndex++) {
       isSelected[buttonIndex] = buttonIndex == index;
@@ -260,9 +260,10 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
               icon: Icon(Icons.arrow_back_ios_new_rounded,
                   size: 31, color: Colors.white),
               onPressed: () {
-                widget.currentReminder.allReminders
-                    .removeAt(widget.currentReminder.allReminders.length - 1);
-
+                if (widget.reminderIndex == -1) {
+                  widget.currentReminder.allReminders
+                      .removeAt(widget.currentReminder.allReminders.length - 1);
+                }
                 Navigator.of(context).pop();
               },
             ),
@@ -332,9 +333,26 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
               Padding(
                 padding: const EdgeInsets.only(right: 10),
                 child: IconButton(
-                  icon:
-                      Icon(Icons.delete_rounded, size: 31, color: Colors.white),
-                  onPressed: () {},
+                  icon: Icon(Icons.delete_rounded,
+                      size: 31,
+                      color: widget.reminderIndex == -1
+                          ? Colors.grey
+                          : Colors.white),
+                  onPressed: () {
+                    if (widget.reminderIndex != -1) {
+                      widget.currentReminder.allReminders
+                          .removeAt(widget.reminderIndex);
+                      widget.weekObject.weeks[widget.weekSelectedIndex]
+                          .reminders.allReminders
+                          .removeAt(widget.weekReminderIndex);
+                      BlocProvider.of<ChangeRemindersBloc>(context)
+                          .add(AddRemindersEvent());
+                      db.putAll({
+                        'reminders': widget.currentReminder,
+                      });
+                      Navigator.of(context).pop();
+                    }
+                  },
                 ),
               )
             ],
@@ -389,6 +407,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                                   .allReminders
                                                   .length -
                                               1];
+                                          List<Topic>? subtopics = [];
                                           obj.tag1 = tag1Controller.text;
                                           obj.tag2 = tag2Controller.text;
                                           obj.subtitle =
@@ -399,17 +418,30 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                           for (int i = 0;
                                               i < topicsController.length;
                                               i++) {
+                                            if (obj.topics == null) {
+                                              obj.topics = [];
+                                            }
+                                            if (subtopicsController[i] !=
+                                                null) {
+                                              for (int j = 0;
+                                                  j <
+                                                      subtopicsController[i]!
+                                                          .length;
+                                                  j++) {
+                                                subtopics.add(Topic(
+                                                    description:
+                                                        subtopicsController[i]![
+                                                                j]
+                                                            .text));
+                                              }
+                                            }
+                                            obj.topics!.add(Topic(
+                                                description:
+                                                    topicsController[i].text,
+                                                subTopics: subtopics));
                                             topicsController[i].clear();
                                           }
-                                          if (widget
-                                                  .currentReminder
-                                                  .allReminders[widget
-                                                          .currentReminder
-                                                          .allReminders
-                                                          .length -
-                                                      1]
-                                                  .deadlineType ==
-                                              'none') {
+                                          if (obj.deadlineType == 'none') {
                                             for (int i = 0;
                                                 i <
                                                     widget.weekObject.weeks
@@ -417,40 +449,25 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                                 i++) {
                                               widget.weekObject.weeks[i]
                                                   .reminders.allReminders
-                                                  .add(widget.currentReminder
-                                                      .allReminders[widget
-                                                          .currentReminder
-                                                          .allReminders
-                                                          .length -
-                                                      1]);
+                                                  .add(obj);
                                             }
                                           } else {
                                             widget
                                                 .weekObject
                                                 .weeks[func.calculateWeekIndex(
-                                                        widget
-                                                            .currentReminder
-                                                            .allReminders[widget
-                                                                    .currentReminder
-                                                                    .allReminders
-                                                                    .length -
-                                                                1]
-                                                            .deadline,
+                                                        obj.deadline,
                                                         widget.initialDate) -
                                                     1]
                                                 .reminders
                                                 .allReminders
-                                                .add(widget.currentReminder
-                                                    .allReminders[widget
-                                                        .currentReminder
-                                                        .allReminders
-                                                        .length -
-                                                    1]);
+                                                .add(obj);
                                           }
                                           BlocProvider.of<ChangeRemindersBloc>(
                                                   context)
                                               .add(AddRemindersEvent());
-
+                                          db.putAll({
+                                            'reminders': widget.currentReminder,
+                                          });
                                           Navigator.of(context).pop();
                                         },
                                         child: Container(
@@ -608,45 +625,59 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                   ),
                                 ),
                                 func.checkOnOrBefore(widget.currentReminder)
-                                    ? Padding(
-                                        padding: EdgeInsets.only(
-                                            top: 25,
-                                            left: 60,
-                                            right: 60,
-                                            bottom: 20),
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            _selectDate(
-                                                context, widget.initialDate);
-                                          },
-                                          child: AspectRatio(
-                                            aspectRatio: 5,
-                                            child: Container(
-                                                decoration: BoxDecoration(
-                                                    color: Color(0xff1f1f1f),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            50)),
-                                                child: Center(
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 5, right: 5),
-                                                    child: AutoSizeText(
-                                                      func.getSelectedDate(
-                                                          widget.selectedDay
-                                                              .selectedDay),
-                                                      maxLines: 1,
-                                                      style:
-                                                          GoogleFonts.questrial(
-                                                              fontSize: 20,
-                                                              color: Color(
-                                                                  0xffffffff)),
-                                                    ),
-                                                  ),
-                                                )),
-                                          ),
-                                        ))
+                                    ? BlocBuilder<DateSelectedBloc,
+                                        DateSelectedState>(
+                                        builder: (context, state) {
+                                          return Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 25,
+                                                  left: 60,
+                                                  right: 60,
+                                                  bottom: 20),
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  time.selectDate(
+                                                      context,
+                                                      widget.initialDate,
+                                                      widget.currentReminder,
+                                                      widget.selectedDay);
+                                                },
+                                                child: AspectRatio(
+                                                  aspectRatio: 5,
+                                                  child: Container(
+                                                      decoration: BoxDecoration(
+                                                          color:
+                                                              Color(0xff1f1f1f),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      50)),
+                                                      child: Center(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                      .only(
+                                                                  left: 5,
+                                                                  right: 5),
+                                                          child: AutoSizeText(
+                                                            func.getSelectedDate(
+                                                                widget
+                                                                    .selectedDay
+                                                                    .selectedDay),
+                                                            maxLines: 1,
+                                                            style: GoogleFonts
+                                                                .questrial(
+                                                                    fontSize:
+                                                                        20,
+                                                                    color: Color(
+                                                                        0xffffffff)),
+                                                          ),
+                                                        ),
+                                                      )),
+                                                ),
+                                              ));
+                                        },
+                                      )
                                     : Padding(
                                         padding: EdgeInsets.only(bottom: 20))
                               ]);

@@ -5,6 +5,7 @@ import 'package:chronos/algorithms/timeCalc.dart';
 import 'package:chronos/algorithms/widgetDecider.dart';
 import 'package:chronos/constants/colors.dart';
 import 'package:chronos/constants/icons.dart';
+import 'package:chronos/data/model/currentSessionReminders.dart';
 import 'package:chronos/data/model/hive_reminder.dart';
 import 'package:chronos/data/model/selectedDay.dart';
 import 'package:chronos/data/model/hive_topic.dart';
@@ -20,6 +21,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:intl/intl.dart';
 
@@ -43,23 +45,47 @@ class _HomePageState extends State<HomePage> {
   Reminders allReminders = Reminders(allReminders: []);
   Methods func = Methods();
   WidgetDecider wd = WidgetDecider();
+  NumberOfReminders count = NumberOfReminders(count: 0);
 
   List<Widget> taskList = [];
   int weekSelectedIndex = 0;
   bool sliverPersistentHeader = false;
   List<Widget> weekDays = [];
   List<String> selectedDays = [];
+  var db = Hive.box('Database');
 
   late SelectedDay selectedDay;
   late int currentWeekIndex;
 
-  DateTime appStartDate = DateTime(2022, 12, 15);
+  DateTime appStartDate =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
   DateTime currentStartDate =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
   void initialize() {
+    if (db.get('appOpenCount') == null) {
+      db.putAll({
+        'appOpenCount': 0,
+        'initialDate': appStartDate,
+        'reminders': allReminders,
+      });
+    } else {
+      allReminders = db.get('reminders');
+      appStartDate = db.get('initialDate');
+    }
+    if (db.get('appOpenCount') < 10000) {
+      db.putAll({'appOpenCount': db.get('appOpenCount') + 1});
+    }
+    // db.delete('appOpenCount');
+    // db.delete('reminders');
+    // db.delete('initialDate');
+    // db.delete('weeks');
+    print(db.get('appOpenCount'));
+    print(db.get('initialDate'));
+    print(db.get('reminders'));
     weekObject = time.initializeWeeks(appStartDate);
+    func.initializeWeeklyReminders(allReminders, weekObject);
     weekSelectedIndex =
         func.calculateWeekIndex(currentStartDate, appStartDate) - 1;
     currentWeekIndex = weekSelectedIndex;
@@ -80,7 +106,6 @@ class _HomePageState extends State<HomePage> {
     });
     weekDays = func.selectedWeek(
         selectedDay, weekObject, weekSelectedIndex, selectedDay);
-    func.initializeWeeklyReminders(allReminders, weekObject);
   }
 
   @override
@@ -99,10 +124,10 @@ class _HomePageState extends State<HomePage> {
           weekDays = func.selectedWeek(
               state.selectedDay, weekObject, weekSelectedIndex, selectedDay);
           taskList =
-              wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay);
+              wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay, allReminders, context, appStartDate, count, db);
         } else {
           taskList =
-              wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay);
+              wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay, allReminders, context, appStartDate, count, db);
         }
         return Scaffold(
             backgroundColor: col.appColor,
@@ -166,7 +191,7 @@ class _HomePageState extends State<HomePage> {
             body: BlocBuilder<ChangeRemindersBloc, ChangeRemindersState>(
               builder: (context, state) {
                 taskList = wd.currentDayTasks(
-                    weekObject, weekSelectedIndex, selectedDay);
+                    weekObject, weekSelectedIndex, selectedDay, allReminders, context, appStartDate, count, db);
                 return CustomScrollView(controller: _controller, slivers: [
                   SliverAppBar(
                     pinned: true,
@@ -205,7 +230,7 @@ class _HomePageState extends State<HomePage> {
                       allReminders.allReminders.add(Reminder(
                           tag1: '',
                           tag2: '',
-                          deadline: DateTime.now(),
+                          deadline: selectedDay.selectedDay,
                           deadlineType: 'none',
                           color: Color(0xffb793da),
                           isDescriptive: true,

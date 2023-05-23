@@ -41,12 +41,14 @@ class TaskCard extends StatelessWidget {
                         AutoSizeText(reminder.tag1.toUpperCase(),
                             minFontSize: 30,
                             maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.questrial(
                                 letterSpacing: 0.5,
                                 fontSize: 42,
                                 color: col.primaryTextColor,
                                 fontWeight: FontWeight.w600)),
                         AutoSizeText(reminder.tag2.toUpperCase(),
+                            overflow: TextOverflow.ellipsis,
                             minFontSize: 30,
                             maxLines: 1,
                             style: GoogleFonts.questrial(
@@ -61,8 +63,8 @@ class TaskCard extends StatelessWidget {
                       flex: 2,
                       child: Center(
                         child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: wd.decideDeadline(reminder)),
+                            mainAxisSize: MainAxisSize.min,
+                            children: wd.decideDeadline(reminder)),
                       ))
                 ],
               ),

@@ -132,6 +132,9 @@ class Methods {
             "on" ||
         currentReminder.allReminders[currentReminder.allReminders.length - 1]
                 .deadlineType ==
-            "before";
+            "before" ||
+        currentReminder.allReminders[currentReminder.allReminders.length - 1]
+                .deadlineType ==
+            "thisWeek";
   }
 }

@@ -1,9 +1,15 @@
+// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
+
+import 'package:chronos/business_logic/blocs/date_selected/date_selected_bloc.dart';
 import 'package:chronos/data/model/hive_reminder.dart';
 import 'package:chronos/data/model/hive_week.dart';
 import 'package:chronos/data/repositories/hive_allReminders.dart';
 import 'package:chronos/data/repositories/hive_weeks.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+
+import '../data/model/selectedDay.dart';
 
 class TimeNow {
   Weeks initializeWeeks(DateTime start) {
@@ -42,5 +48,25 @@ class TimeNow {
     }
 
     return weekObject;
+  }
+
+  Future<void> selectDate(BuildContext context, DateTime initialDate,
+      Reminders currentReminder, SelectedDay selectedDay) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDay.selectedDay,
+      firstDate: DateTime(2022),
+      lastDate: DateTime(2024),
+      selectableDayPredicate: (DateTime date) {
+        return date.isAfter(initialDate.subtract(Duration(days: 1)));
+      },
+    );
+
+    if (picked != null) {
+      currentReminder.allReminders[currentReminder.allReminders.length - 1]
+          .deadline = picked;
+    }
+
+    BlocProvider.of<DateSelectedBloc>(context).add(DateChangedEvent());
   }
 }

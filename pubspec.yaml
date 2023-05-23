@@ -47,6 +47,8 @@ dependencies:
   build_runner: ^2.3.3
   hive_generator: ^1.1.0
   flutter_switch: ^0.3.2
+  hive_flutter: ^1.1.0
+  flutter_swipe: ^1.0.1
 
 dev_dependencies:
   flutter_test:
