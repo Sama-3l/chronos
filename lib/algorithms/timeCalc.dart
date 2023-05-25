@@ -69,4 +69,24 @@ class TimeNow {
 
     BlocProvider.of<DateSelectedBloc>(context).add(DateChangedEvent());
   }
+
+  Future<void> editDate(BuildContext context, DateTime initialDate,
+      Reminders currentReminder, SelectedDay selectedDay) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: currentReminder.allReminders[currentReminder.allReminders.length - 1].deadline,
+      firstDate: DateTime(2022),
+      lastDate: DateTime(2024),
+      selectableDayPredicate: (DateTime date) {
+        return date.isAfter(initialDate.subtract(Duration(days: 1)));
+      },
+    );
+
+    if (picked != null) {
+      currentReminder.allReminders[currentReminder.allReminders.length - 1]
+          .deadline = picked;
+    }
+
+    BlocProvider.of<DateSelectedBloc>(context).add(DateChangedEvent());
+  }
 }

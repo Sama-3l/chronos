@@ -64,22 +64,22 @@ class _HomePageState extends State<HomePage> {
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
   void initialize() {
-    if (db.get('appOpenCount') == null) {
-      db.putAll({
-        'appOpenCount': 0,
-        'initialDate': appStartDate,
-        'reminders': allReminders,
-      });
-    } else {
-      allReminders = db.get('reminders');
-      appStartDate = db.get('initialDate');
-    }
-    if (db.get('appOpenCount') < 10000) {
-      db.putAll({'appOpenCount': db.get('appOpenCount') + 1});
-    }
-    // db.delete('appOpenCount');
-    // db.delete('reminders');
-    // db.delete('initialDate');
+    // if (db.get('appOpenCount') == null) {
+    //   db.putAll({
+    //     'appOpenCount': 0,
+    //     'initialDate': appStartDate,
+    //     'reminders': allReminders,
+    //   });
+    // } else {
+    //   allReminders = db.get('reminders');
+    //   appStartDate = db.get('initialDate');
+    // }
+    // if (db.get('appOpenCount') < 10000) {
+    //   db.putAll({'appOpenCount': db.get('appOpenCount') + 1});
+    // }
+    db.delete('appOpenCount');
+    db.delete('reminders');
+    db.delete('initialDate');
     // db.delete('weeks');
     print(db.get('appOpenCount'));
     print(db.get('initialDate'));
@@ -123,11 +123,11 @@ class _HomePageState extends State<HomePage> {
           weekSelectedIndex = selectedDay.selectedWeekIndex;
           weekDays = func.selectedWeek(
               state.selectedDay, weekObject, weekSelectedIndex, selectedDay);
-          taskList =
-              wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay, allReminders, context, appStartDate, count, db);
+          taskList = wd.currentDayTasks(weekObject, weekSelectedIndex,
+              selectedDay, allReminders, context, appStartDate, count, db);
         } else {
-          taskList =
-              wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay, allReminders, context, appStartDate, count, db);
+          taskList = wd.currentDayTasks(weekObject, weekSelectedIndex,
+              selectedDay, allReminders, context, appStartDate, count, db);
         }
         return Scaffold(
             backgroundColor: col.appColor,
@@ -191,7 +191,14 @@ class _HomePageState extends State<HomePage> {
             body: BlocBuilder<ChangeRemindersBloc, ChangeRemindersState>(
               builder: (context, state) {
                 taskList = wd.currentDayTasks(
-                    weekObject, weekSelectedIndex, selectedDay, allReminders, context, appStartDate, count, db);
+                    weekObject,
+                    weekSelectedIndex,
+                    selectedDay,
+                    allReminders,
+                    context,
+                    appStartDate,
+                    count,
+                    db);
                 return CustomScrollView(controller: _controller, slivers: [
                   SliverAppBar(
                     pinned: true,
@@ -234,16 +241,18 @@ class _HomePageState extends State<HomePage> {
                           deadlineType: 'none',
                           color: Color(0xffb793da),
                           isDescriptive: true,
-                          subtitle: '',
+                          subtitle: 'Topics',
                           topics: null));
 
                       Navigator.of(context)
                           .push((MaterialPageRoute(builder: (context) {
                         return AddReminderDescriptive(
-                            selectedDay: selectedDay,
-                            currentReminder: allReminders,
-                            weekObject: weekObject,
-                            initialDate: appStartDate);
+                          selectedDay: selectedDay,
+                          currentReminder: allReminders,
+                          weekObject: weekObject,
+                          initialDate: appStartDate,
+                          reminderIndex: allReminders.allReminders.length - 1,
+                        );
                       })));
                     },
                     child: Iconify(addReminder,

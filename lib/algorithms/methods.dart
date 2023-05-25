@@ -137,4 +137,10 @@ class Methods {
                 .deadlineType ==
             "thisWeek";
   }
+
+  bool checkBeforeSubmission(TextEditingController tag1,
+      TextEditingController tag2) {
+    return tag1.text.trim().isNotEmpty &&
+        tag2.text.trim().isNotEmpty;
+  }
 }

@@ -4,6 +4,7 @@ import 'package:chronos/algorithms/methods.dart';
 import 'package:chronos/algorithms/timeCalc.dart';
 import 'package:chronos/algorithms/widgetDecider.dart';
 import 'package:chronos/business_logic/blocs/change_reminder/change_reminders_bloc.dart';
+import 'package:chronos/business_logic/blocs/fix_error/fix_error_bloc.dart';
 import 'package:chronos/data/model/hive_topic.dart';
 import 'package:chronos/data/repositories/hive_weeks.dart';
 import 'package:flutter/cupertino.dart';
@@ -34,7 +35,8 @@ class AddReminderDescriptive extends StatefulWidget {
       required this.initialDate,
       this.reminderIndex = -1,
       this.weekSelectedIndex = -1,
-      this.weekReminderIndex = -1});
+      this.weekReminderIndex = -1,
+      this.edit = false});
 
   Reminders currentReminder;
   SelectedDay selectedDay;
@@ -43,6 +45,7 @@ class AddReminderDescriptive extends StatefulWidget {
   int reminderIndex;
   int weekSelectedIndex;
   int weekReminderIndex;
+  bool edit;
 
   @override
   State<AddReminderDescriptive> createState() => _AddReminderDescriptiveState();
@@ -52,17 +55,81 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
   @override
   void initState() {
     super.initState();
-    if (widget.reminderIndex != -1) {
+
+    tag1Controller.addListener(() {
+      if (submitReady !=
+          func.checkBeforeSubmission(
+              tag1Controller, tag2Controller)) {
+        submitReady = func.checkBeforeSubmission(
+            tag1Controller, tag2Controller);
+        BlocProvider.of<FixErrorBloc>(context).add(ErrorChangeEvent());
+      }
+    });
+    tag2Controller.addListener(() {
+      if (submitReady !=
+          func.checkBeforeSubmission(
+              tag1Controller, tag2Controller)) {
+        submitReady = func.checkBeforeSubmission(
+            tag1Controller, tag2Controller);
+        BlocProvider.of<FixErrorBloc>(context).add(ErrorChangeEvent());
+      }
+    });
+
+    if (widget.edit) {
+      Reminder obj = widget.currentReminder.allReminders[widget.reminderIndex];
       editTaskCard = true;
-      tag1Controller.text =
-          widget.currentReminder.allReminders[widget.reminderIndex].tag1;
-      tag2Controller.text =
-          widget.currentReminder.allReminders[widget.reminderIndex].tag2;
-      // if(widget.currentReminder.allReminders[widget.reminderIndex].topics != null){
-      //   for(int i = 0; i < widget.currentReminder.allReminders[widget.reminderIndex].topics!.length; i++){
-      //     topicsController[i].text = widget.currentReminder.allReminders[widget.reminderIndex].topics![i].description;
-      //   }
-      // }
+      tag1Controller.text = obj.tag1;
+      tag2Controller.text = obj.tag2;
+
+      late int index;
+      if (obj.deadlineType == 'none') {
+        index = 0;
+      } else if (obj.deadlineType == 'thisWeek') {
+        index = 1;
+      } else if (obj.deadlineType == 'on') {
+        index = 2;
+      } else {
+        index = 3;
+      }
+
+      for (int i = 0; i < isSelected.length; i++) {
+        isSelected[i] = i == index;
+      }
+
+
+      if (widget.currentReminder.allReminders[widget.reminderIndex].topics !=
+          null) {
+        for (int i = 0;
+            i <
+                widget.currentReminder.allReminders[widget.reminderIndex]
+                    .topics!.length;
+            i++) {
+          if (topicsController.length - 1 != i) {
+            topicsController.add(TextEditingController());
+          }
+          topicsController[i].text = widget.currentReminder
+              .allReminders[widget.reminderIndex].topics![i].description;
+          if (widget.currentReminder.allReminders[widget.reminderIndex]
+              .topics![i].subTopics!.isNotEmpty) {
+            for (int j = 0;
+                j <
+                    widget.currentReminder.allReminders[widget.reminderIndex]
+                        .topics![i].subTopics!.length;
+                j++) {
+              if (subtopicsController[i] == null) {
+                subtopicsController.addAll({i: []});
+              }
+              subtopicsController[i]!.add(TextEditingController());
+              subtopicsController[i]![j].text = widget
+                  .currentReminder
+                  .allReminders[widget.reminderIndex]
+                  .topics![i]
+                  .subTopics![j]
+                  .description;
+            }
+          }
+        }
+      }
     }
   }
 
@@ -70,14 +137,15 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
   TextEditingController tag1Controller = TextEditingController();
   TextEditingController tag2Controller = TextEditingController();
   TextEditingController subtitleController = TextEditingController();
-  List<TextEditingController> topicsController = [TextEditingController()];
-  Map<int, List<TextEditingController>> subtopicsController = {0: []};
+  List<TextEditingController> topicsController = [];
+  Map<int, List<TextEditingController>> subtopicsController = {};
   TagColors col = TagColors();
   Methods func = Methods();
   WidgetDecider wd = WidgetDecider();
   TimeNow time = TimeNow();
   bool editTaskCard = false;
   var db = Hive.box('Database');
+  bool submitReady = false;
 
   int intDeadlineType = 0;
   final List<bool> isSelected = [true, false, false, false];
@@ -103,6 +171,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                 padding: const EdgeInsets.only(right: 5),
                 child: IconButton(
                     onPressed: () {
+                      subtopicsController[0] = [];
                       subtopicsController[0]!.add(TextEditingController());
                       BlocProvider.of<ChangeTopicsBloc>(context)
                           .add(TopicsChangedEvent());
@@ -176,7 +245,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
       }
     }
 
-    topicsController.length > 1
+    topicsController.isNotEmpty
         ? topics.add(Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -222,25 +291,17 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
       isSelected[buttonIndex] = buttonIndex == index;
 
       if (buttonIndex == 0 && isSelected[buttonIndex] == true) {
-        widget
-            .currentReminder
-            .allReminders[widget.currentReminder.allReminders.length - 1]
-            .deadlineType = "none";
+        widget.currentReminder.allReminders[widget.reminderIndex].deadlineType =
+            "none";
       } else if (buttonIndex == 1 && isSelected[buttonIndex] == true) {
-        widget
-            .currentReminder
-            .allReminders[widget.currentReminder.allReminders.length - 1]
-            .deadlineType = "thisWeek";
+        widget.currentReminder.allReminders[widget.reminderIndex].deadlineType =
+            "thisWeek";
       } else if (buttonIndex == 2 && isSelected[buttonIndex] == true) {
-        widget
-            .currentReminder
-            .allReminders[widget.currentReminder.allReminders.length - 1]
-            .deadlineType = "on";
+        widget.currentReminder.allReminders[widget.reminderIndex].deadlineType =
+            "on";
       } else if (buttonIndex == 3 && isSelected[buttonIndex] == true) {
-        widget
-            .currentReminder
-            .allReminders[widget.currentReminder.allReminders.length - 1]
-            .deadlineType = "before";
+        widget.currentReminder.allReminders[widget.reminderIndex].deadlineType =
+            "before";
       }
     }
   }
@@ -262,7 +323,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
               onPressed: () {
                 if (widget.reminderIndex == -1) {
                   widget.currentReminder.allReminders
-                      .removeAt(widget.currentReminder.allReminders.length - 1);
+                      .removeAt(widget.reminderIndex);
                 }
                 Navigator.of(context).pop();
               },
@@ -335,11 +396,13 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                 child: IconButton(
                   icon: Icon(Icons.delete_rounded,
                       size: 31,
-                      color: widget.reminderIndex == -1
+                      color: widget.reminderIndex ==
+                              widget.currentReminder.allReminders.length - 1
                           ? Colors.grey
                           : Colors.white),
                   onPressed: () {
-                    if (widget.reminderIndex != -1) {
+                    if (widget.reminderIndex !=
+                        widget.currentReminder.allReminders.length - 1) {
                       widget.currentReminder.allReminders
                           .removeAt(widget.reminderIndex);
                       widget.weekObject.weeks[widget.weekSelectedIndex]
@@ -365,12 +428,8 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                     padding: EdgeInsets.only(right: 15, left: 15, bottom: 10),
                     child: Container(
                       decoration: BoxDecoration(
-                          color: widget
-                              .currentReminder
-                              .allReminders[
-                                  widget.currentReminder.allReminders.length -
-                                      1]
-                              .color,
+                          color: widget.currentReminder
+                              .allReminders[widget.reminderIndex].color,
                           borderRadius: BorderRadius.all(Radius.circular(30))),
                       height: MediaQuery.of(context).size.height,
                     ),
@@ -388,11 +447,24 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                     Padding(
                                       padding: const EdgeInsets.only(
                                           top: 40, left: 17, bottom: 10),
-                                      child: AutoSizeText(
-                                        "Title",
-                                        style: GoogleFonts.questrial(
-                                            fontSize: 27,
-                                            color: Color(0xff1f1f1f)),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          AutoSizeText(
+                                            "Title",
+                                            style: GoogleFonts.questrial(
+                                                fontSize: 27,
+                                                color: Color(0xff1f1f1f)),
+                                          ),
+                                          AutoSizeText(
+                                            "(Suggesting that you fill this)",
+                                            style: GoogleFonts.questrial(
+                                                fontSize: 2,
+                                                color: Color(0xff1f1f1f)),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                     Spacer(),
@@ -401,87 +473,100 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                           top: 5, right: 5, bottom: 20),
                                       child: GestureDetector(
                                         onTap: () {
-                                          Reminder obj = widget.currentReminder
-                                              .allReminders[widget
-                                                  .currentReminder
-                                                  .allReminders
-                                                  .length -
-                                              1];
-                                          List<Topic>? subtopics = [];
-                                          obj.tag1 = tag1Controller.text;
-                                          obj.tag2 = tag2Controller.text;
-                                          obj.subtitle =
-                                              subtitleController.text;
-                                          tag1Controller.clear();
-                                          tag2Controller.clear();
-                                          subtitleController.clear();
-                                          for (int i = 0;
-                                              i < topicsController.length;
-                                              i++) {
-                                            if (obj.topics == null) {
-                                              obj.topics = [];
+                                          Reminder obj = widget
+                                                  .currentReminder.allReminders[
+                                              widget.reminderIndex];
+                                          if (submitReady) {
+                                            List<Topic>? subtopics = [];
+                                            obj.tag1 = tag1Controller.text;
+                                            obj.tag2 = tag2Controller.text;
+                                            if (subtitleController.text != '') {
+                                              obj.subtitle =
+                                                  subtitleController.text;
                                             }
-                                            if (subtopicsController[i] !=
-                                                null) {
-                                              for (int j = 0;
-                                                  j <
-                                                      subtopicsController[i]!
-                                                          .length;
-                                                  j++) {
-                                                subtopics.add(Topic(
-                                                    description:
-                                                        subtopicsController[i]![
-                                                                j]
-                                                            .text));
+
+                                            tag1Controller.clear();
+                                            tag2Controller.clear();
+                                            subtitleController.clear();
+                                            for (int i = 0;
+                                                i < topicsController.length;
+                                                i++) {
+                                              subtopics = [];
+                                              if (obj.topics == null) {
+                                                obj.topics = [];
+                                              }
+                                              if (subtopicsController[i] !=
+                                                  null) {
+                                                for (int j = 0;
+                                                    j <
+                                                        subtopicsController[i]!
+                                                            .length;
+                                                    j++) {
+                                                  subtopics.add(Topic(
+                                                      description:
+                                                          subtopicsController[
+                                                                  i]![j]
+                                                              .text));
+                                                }
+                                              }
+
+                                              obj.topics!.add(Topic(
+                                                  description:
+                                                      topicsController[i].text,
+                                                  subTopics: subtopics));
+                                              topicsController[i].clear();
+                                            }
+                                            if (!widget.edit) {
+                                              if (obj.deadlineType == 'none') {
+                                                for (int i = 0;
+                                                    i <
+                                                        widget.weekObject.weeks
+                                                            .length;
+                                                    i++) {
+                                                  widget.weekObject.weeks[i]
+                                                      .reminders.allReminders
+                                                      .add(obj);
+                                                }
+                                              } else {
+                                                widget
+                                                    .weekObject
+                                                    .weeks[func.calculateWeekIndex(
+                                                            obj.deadline,
+                                                            widget
+                                                                .initialDate) -
+                                                        1]
+                                                    .reminders
+                                                    .allReminders
+                                                    .add(obj);
                                               }
                                             }
-                                            obj.topics!.add(Topic(
-                                                description:
-                                                    topicsController[i].text,
-                                                subTopics: subtopics));
-                                            topicsController[i].clear();
+                                            BlocProvider.of<
+                                                        ChangeRemindersBloc>(
+                                                    context)
+                                                .add(AddRemindersEvent());
+                                            db.putAll({
+                                              'reminders':
+                                                  widget.currentReminder,
+                                            });
+                                            Navigator.of(context).pop();
                                           }
-                                          if (obj.deadlineType == 'none') {
-                                            for (int i = 0;
-                                                i <
-                                                    widget.weekObject.weeks
-                                                        .length;
-                                                i++) {
-                                              widget.weekObject.weeks[i]
-                                                  .reminders.allReminders
-                                                  .add(obj);
-                                            }
-                                          } else {
-                                            widget
-                                                .weekObject
-                                                .weeks[func.calculateWeekIndex(
-                                                        obj.deadline,
-                                                        widget.initialDate) -
-                                                    1]
-                                                .reminders
-                                                .allReminders
-                                                .add(obj);
-                                          }
-                                          BlocProvider.of<ChangeRemindersBloc>(
-                                                  context)
-                                              .add(AddRemindersEvent());
-                                          db.putAll({
-                                            'reminders': widget.currentReminder,
-                                          });
-                                          Navigator.of(context).pop();
                                         },
-                                        child: Container(
-                                            width: 65,
-                                            height: 65,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                  color: Color(0xffffffff),
-                                                  width: 2),
-                                              color: Color(0xffffffff),
-                                            ),
-                                            child: Icon(Icons.done_rounded,
-                                                size: 45)),
+                                        child: BlocBuilder<FixErrorBloc,
+                                            FixErrorState>(
+                                          builder: (context, state) {
+                                            return Container(
+                                                width: 65,
+                                                height: 65,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: submitReady
+                                                      ? Color(0xffffffff)
+                                                      : Color(0xffdadada),
+                                                ),
+                                                child: Icon(Icons.done_rounded,
+                                                    size: 45));
+                                          },
+                                        ),
                                       ),
                                     )
                                   ],
@@ -527,7 +612,18 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                 BlocBuilder<ChangeTopicsBloc,
                                     ChangeTopicsState>(
                                   builder: (context, state) {
-                                    return Column(children: getTopics(context));
+                                    return widget
+                                                .currentReminder
+                                                .allReminders[
+                                                    widget.reminderIndex]
+                                                .topics ==
+                                            null
+                                        ? Center(
+                                            child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: getTopics(context)),
+                                          )
+                                        : Column(children: getTopics(context));
                                   },
                                 ),
                                 Padding(
@@ -544,9 +640,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                   child: Row(
                                       children: wd.getColors(
                                           widget.currentReminder.allReminders[
-                                              widget.currentReminder
-                                                      .allReminders.length -
-                                                  1],
+                                              widget.reminderIndex],
                                           col,
                                           context)),
                                 ),
@@ -636,11 +730,19 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                                   bottom: 20),
                                               child: GestureDetector(
                                                 onTap: () {
-                                                  time.selectDate(
-                                                      context,
-                                                      widget.initialDate,
-                                                      widget.currentReminder,
-                                                      widget.selectedDay);
+                                                  if (widget.edit) {
+                                                    time.editDate(
+                                                        context,
+                                                        widget.initialDate,
+                                                        widget.currentReminder,
+                                                        widget.selectedDay);
+                                                  } else {
+                                                    time.selectDate(
+                                                        context,
+                                                        widget.initialDate,
+                                                        widget.currentReminder,
+                                                        widget.selectedDay);
+                                                  }
                                                 },
                                                 child: AspectRatio(
                                                   aspectRatio: 5,
@@ -660,8 +762,14 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                                                   left: 5,
                                                                   right: 5),
                                                           child: AutoSizeText(
-                                                            func.getSelectedDate(
-                                                                widget
+                                                            widget.edit
+                                                                ? func.getSelectedDate(widget
+                                                                    .currentReminder
+                                                                    .allReminders[
+                                                                        widget
+                                                                            .reminderIndex]
+                                                                    .deadline)
+                                                                : func.getSelectedDate(widget
                                                                     .selectedDay
                                                                     .selectedDay),
                                                             maxLines: 1,

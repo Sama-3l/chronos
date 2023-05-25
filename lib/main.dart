@@ -5,6 +5,7 @@ import 'package:chronos/business_logic/blocs/change_reminder/change_reminders_bl
 import 'package:chronos/business_logic/blocs/change_topics/change_topics_bloc.dart';
 import 'package:chronos/business_logic/blocs/change_week/change_week_bloc.dart';
 import 'package:chronos/business_logic/blocs/date_selected/date_selected_bloc.dart';
+import 'package:chronos/business_logic/blocs/fix_error/fix_error_bloc.dart';
 import 'package:chronos/business_logic/blocs/toggle_buttons/toggle_buttons_bloc.dart';
 import 'package:chronos/data/model/color.g.dart';
 import 'package:chronos/data/model/dateTime.g.dart';
@@ -46,7 +47,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ChangeColorBloc()),
         BlocProvider(create: (context) => ToggleButtonsBloc()),
         BlocProvider(create: (context) => ChangeTopicsBloc()),
-        BlocProvider(create: (context) => DateSelectedBloc())
+        BlocProvider(create: (context) => DateSelectedBloc()),
+        BlocProvider(create: (context) => FixErrorBloc())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

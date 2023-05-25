@@ -297,17 +297,18 @@ class WidgetDecider {
             },
             child: GestureDetector(
               onTap: () {
+                Reminder obj = currentWeek.reminders.allReminders[j];
                 Navigator.of(context).push(
                   HeroDialogRoute(
                     builder: (context) => Center(
-                      child: PopUp(
-                          reminder: currentWeek.reminders.allReminders[j],
-                          selectedDay: selectedDay),
+                      child: PopUp(reminder: obj, selectedDay: selectedDay),
                     ),
                   ),
                 );
               },
               onDoubleTap: () {
+                print(currentWeek.reminders.allReminders[j].color);
+                print(currentWeek.reminders.allReminders[j].tag1);
                 Navigator.of(context)
                     .push((MaterialPageRoute(builder: (context) {
                   return AddReminderDescriptive(
@@ -318,7 +319,8 @@ class WidgetDecider {
                       reminderIndex: allReminders.allReminders
                           .indexOf(currentWeek.reminders.allReminders[j]),
                       weekSelectedIndex: weekSelectedIndex,
-                      weekReminderIndex: j);
+                      weekReminderIndex: j,
+                      edit: true);
                 })));
               },
               child: TaskCard(
@@ -361,5 +363,104 @@ class WidgetDecider {
     }
 
     return allColors;
+  }
+
+  List<Widget> popUpTopics(Reminder reminder, BuildContext context) {
+    List<Widget> popUpTopics = [];
+    List<Widget> subTopics = [];
+
+    if (reminder.topics != null) {
+      for (int i = 0; i < reminder.topics!.length; i++) {
+        subTopics = [];
+        if (reminder.topics![i].subTopics!.isNotEmpty) {
+          subTopics.add(Padding(
+            padding: const EdgeInsets.only(left: 13, top: 7, right: 13),
+            child: AutoSizeText(reminder.topics![i].description,
+                minFontSize: 6,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.questrial(
+                    letterSpacing: -1, fontSize: 24, color: Colors.black)),
+          ));
+
+          for (int j = 0; j < reminder.topics![i].subTopics!.length; j++) {
+            subTopics.add(Padding(
+                padding: EdgeInsets.only(
+                    top: j == 0 ? 5 : 0,
+                    bottom: j == reminder.topics!.length - 1 ? 25 : 10,
+                    left: 7,
+                    right: 7),
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                      color: Color(0xffB793DA),
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(5)),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        top: 10, bottom: 15, left: 10, right: 10),
+                    child: AutoSizeText(
+                        reminder.topics![i].subTopics![j].description,
+                        minFontSize: 4,
+                        softWrap: true,
+                        style: GoogleFonts.questrial(
+                            fontSize: 14, color: Colors.black)),
+                  ),
+                )));
+          }
+        }
+        reminder.topics![i].subTopics!.isEmpty
+            ? popUpTopics.add(Padding(
+                padding: EdgeInsets.only(
+                    left: 7,
+                    right: 7,
+                    bottom: i == reminder.topics!.length - 1 &&
+                            reminder.topics![i].subTopics!.isEmpty
+                        ? 35
+                        : 5),
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                      color: Color(0xffD9D9D9),
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(top: 15, bottom: 15, left: 15),
+                    child: AutoSizeText(reminder.topics![i].description,
+                        minFontSize: 6,
+                        softWrap: true,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.questrial(
+                            letterSpacing: -1,
+                            fontSize: 24,
+                            color: Colors.black)),
+                  ),
+                )))
+            : popUpTopics.add(
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: 7,
+                      right: 7,
+                      bottom: i == reminder.topics!.length - 1 &&
+                              reminder.topics![i].subTopics!.isEmpty
+                          ? 35
+                          : 10),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                        color: Color(0xffD9D9D9),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: subTopics,
+                    ),
+                  ),
+                ),
+              );
+      }
+    }
+
+    return popUpTopics;
   }
 }
