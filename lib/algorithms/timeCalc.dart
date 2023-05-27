@@ -20,7 +20,7 @@ class TimeNow {
   Weeks getWeeksForRange(DateTime start, DateTime end) {
     var date = start;
     DateTime monday;
-    DateTime sunday;
+    DateTime sunday = DateTime.now();
     if (date.weekday != 1) {
       monday = date.subtract(Duration(days: date.weekday - 1));
     } else {
@@ -29,6 +29,7 @@ class TimeNow {
 
     Weeks weekObject = Weeks();
 
+    int p = 0;
     while (date.difference(end).inDays <= 0) {
       if (date.weekday == 1) {
         monday = date;
@@ -43,6 +44,8 @@ class TimeNow {
             reminders: Reminders(allReminders: []),
             week:
                 "Week ${monday.day.toString().padLeft(2, '0')} - ${sunday.day.toString().padLeft(2, '0')}"));
+        print(weekObject.weeks[p].week);
+        p++;
       }
       date = date.add(const Duration(days: 1));
     }

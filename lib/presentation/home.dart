@@ -29,6 +29,8 @@ import '../business_logic/blocs/change_reminder/change_reminders_bloc.dart';
 import '../business_logic/blocs/change_week/change_week_bloc.dart';
 import 'widgets/eachDay.dart';
 
+import 'package:chronos/data/services/notification.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -85,12 +87,17 @@ class _HomePageState extends State<HomePage> {
     print(db.get('initialDate'));
     print(db.get('reminders'));
     weekObject = time.initializeWeeks(appStartDate);
+
     func.initializeWeeklyReminders(allReminders, weekObject);
+
     weekSelectedIndex =
         func.calculateWeekIndex(currentStartDate, appStartDate) - 1;
+
     currentWeekIndex = weekSelectedIndex;
+
     selectedDay = SelectedDay(
         selectedDay: currentStartDate, selectedWeekIndex: weekSelectedIndex);
+
     weekObject.weeks[weekSelectedIndex].selected = true;
 
     _controller.addListener(() {
@@ -234,26 +241,29 @@ class _HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(60)),
                         backgroundColor: col.primaryTextColor),
                     onPressed: () {
-                      allReminders.allReminders.add(Reminder(
-                          tag1: '',
-                          tag2: '',
-                          deadline: selectedDay.selectedDay,
-                          deadlineType: 'none',
-                          color: Color(0xffb793da),
-                          isDescriptive: true,
-                          subtitle: 'Topics',
-                          topics: null));
+                      NotificationService().initializeNotification();
+                      NotificationService()
+                          .showNotification(1, 'hello', 'World');
+                      // allReminders.allReminders.add(Reminder(
+                      //     tag1: '',
+                      //     tag2: '',
+                      //     deadline: selectedDay.selectedDay,
+                      //     deadlineType: 'none',
+                      //     color: Color(0xffb793da),
+                      //     isDescriptive: true,
+                      //     subtitle: 'Topics',
+                      //     topics: null));
 
-                      Navigator.of(context)
-                          .push((MaterialPageRoute(builder: (context) {
-                        return AddReminderDescriptive(
-                          selectedDay: selectedDay,
-                          currentReminder: allReminders,
-                          weekObject: weekObject,
-                          initialDate: appStartDate,
-                          reminderIndex: allReminders.allReminders.length - 1,
-                        );
-                      })));
+                      // Navigator.of(context)
+                      //     .push((MaterialPageRoute(builder: (context) {
+                      //   return AddReminderDescriptive(
+                      //     selectedDay: selectedDay,
+                      //     currentReminder: allReminders,
+                      //     weekObject: weekObject,
+                      //     initialDate: appStartDate,
+                      //     reminderIndex: allReminders.allReminders.length - 1,
+                      //   );
+                      // })));
                     },
                     child: Iconify(addReminder,
                         size: MediaQuery.of(context).size.height * 0.08))));

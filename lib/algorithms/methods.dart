@@ -77,11 +77,20 @@ class Methods {
     while (date!.weekday != 7) {
       date = date.add(Duration(days: 1));
     }
-    if (date.difference(initial).inDays == -7) {
-      return 0;
-    } else {
-      return ((date.difference(initial).inDays) / 7).ceil();
+    print(date);
+    print(initial);
+    print(date.difference(initial).inDays);
+    if(date.difference(initial).inDays % 7 == 0){
+      return (date.difference(initial).inDays / 7).ceil() + 1;  
     }
+    else{
+      return (date.difference(initial).inDays / 7).ceil();
+    }
+    // if (date.difference(initial).inDays == -7) {
+    //   return 0;
+    // } else {
+    //   return ((date.difference(initial).inDays) / 7).ceil();
+    // }
   }
 
   void initializeWeeklyReminders(Reminders allReminders, Weeks weekObject) {
