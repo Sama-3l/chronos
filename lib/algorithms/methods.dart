@@ -6,9 +6,12 @@ import 'package:chronos/data/model/hive_reminder.dart';
 import 'package:chronos/data/repositories/hive_allReminders.dart';
 import 'package:chronos/data/repositories/hive_weeks.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../business_logic/blocs/change_reminder/change_reminders_bloc.dart';
+import '../data/model/hive_topic.dart';
 import '../data/model/selectedDay.dart';
 import '../data/model/hive_week.dart';
 import '../presentation/widgets/eachDay.dart';
@@ -77,13 +80,9 @@ class Methods {
     while (date!.weekday != 7) {
       date = date.add(Duration(days: 1));
     }
-    print(date);
-    print(initial);
-    print(date.difference(initial).inDays);
-    if(date.difference(initial).inDays % 7 == 0){
-      return (date.difference(initial).inDays / 7).ceil() + 1;  
-    }
-    else{
+    if (date.difference(initial).inDays % 7 == 0) {
+      return (date.difference(initial).inDays / 7).ceil() + 1;
+    } else {
       return (date.difference(initial).inDays / 7).ceil();
     }
     // if (date.difference(initial).inDays == -7) {
@@ -147,9 +146,84 @@ class Methods {
             "thisWeek";
   }
 
-  bool checkBeforeSubmission(TextEditingController tag1,
-      TextEditingController tag2) {
-    return tag1.text.trim().isNotEmpty &&
-        tag2.text.trim().isNotEmpty;
+  bool checkBeforeSubmission(
+      TextEditingController tag1, TextEditingController tag2) {
+    return tag1.text.trim().isNotEmpty && tag2.text.trim().isNotEmpty;
+  }
+
+  void submit(
+      Reminders allReminders,
+      int reminderIndex,
+      bool submitReady,
+      TextEditingController tag1Controller,
+      TextEditingController tag2Controller,
+      TextEditingController subtitleController,
+      List<TextEditingController> topicsController,
+      Map<int, List<TextEditingController>> subtopicsController,
+      bool edit,
+      Weeks weekObject,
+      DateTime initialDate,
+      BuildContext context,
+      var db,
+      int originalWeekIndex) {
+    Reminder obj = allReminders.allReminders[reminderIndex];
+    if (submitReady) {
+      List<Topic>? subtopics = [];
+      obj.tag1 = tag1Controller.text;
+      obj.tag2 = tag2Controller.text;
+      if (subtitleController.text != '') {
+        obj.subtitle = subtitleController.text;
+      }
+
+      tag1Controller.clear();
+      tag2Controller.clear();
+      subtitleController.clear();
+      for (int i = 0; i < topicsController.length; i++) {
+        subtopics = [];
+        obj.topics ??= [];
+        if (subtopicsController[i] != null) {
+          for (int j = 0; j < subtopicsController[i]!.length; j++) {
+            subtopics.add(Topic(description: subtopicsController[i]![j].text));
+          }
+        }
+
+        obj.topics!.add(
+            Topic(description: topicsController[i].text, subTopics: subtopics));
+        topicsController[i].clear();
+      }
+      if (!edit) {
+        if (obj.deadlineType == 'none') {
+          for (int i = 0; i < weekObject.weeks.length; i++) {
+            weekObject.weeks[i].reminders.allReminders.add(obj);
+          }
+        } else {
+          weekObject.weeks[calculateWeekIndex(obj.deadline, initialDate) - 1]
+              .reminders.allReminders
+              .add(obj);
+        }
+      } else {
+        weekObject.weeks[originalWeekIndex].reminders.allReminders.remove(obj);
+        if (obj.deadlineType == 'none') {
+          for (int i = 0; i < weekObject.weeks.length; i++) {
+            weekObject.weeks[i].reminders.allReminders.add(obj);
+          }
+        } else {}
+        weekObject.weeks[originalWeekIndex].reminders.allReminders.remove(obj);
+        weekObject.weeks[calculateWeekIndex(obj.deadline, initialDate) - 1]
+            .reminders.allReminders
+            .add(obj);
+      }
+      BlocProvider.of<ChangeRemindersBloc>(context).add(AddRemindersEvent());
+      db.putAll({
+        'reminders': allReminders,
+      });
+    }
+  }
+
+  void deleteAllNone(
+      Reminders allReminders, Weeks weekObject, Reminder? reminderToRemove) {
+    for (int i = 0; i < weekObject.weeks.length; i++) {
+      weekObject.weeks[i].reminders.allReminders.remove(reminderToRemove);
+    }
   }
 }

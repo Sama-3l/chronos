@@ -44,7 +44,6 @@ class TimeNow {
             reminders: Reminders(allReminders: []),
             week:
                 "Week ${monday.day.toString().padLeft(2, '0')} - ${sunday.day.toString().padLeft(2, '0')}"));
-        print(weekObject.weeks[p].week);
         p++;
       }
       date = date.add(const Duration(days: 1));
@@ -60,6 +59,24 @@ class TimeNow {
       initialDate: selectedDay.selectedDay,
       firstDate: DateTime(2022),
       lastDate: DateTime(2024),
+      builder: (context, child) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          dialogBackgroundColor: Colors.grey[800],
+          colorScheme: ColorScheme.light(
+            primary: currentReminder.allReminders[currentReminder.allReminders.length - 1].color, // <-- SEE HERE
+            onPrimary: Colors.white, // <-- SEE HERE
+            onSurface: Colors.white, // <-- SEE HERE
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              primary: Colors.white, // button text color
+            ),
+          ),
+        ),
+        child: child!,
+      );
+    },
       selectableDayPredicate: (DateTime date) {
         return date.isAfter(initialDate.subtract(Duration(days: 1)));
       },
@@ -80,6 +97,23 @@ class TimeNow {
       initialDate: currentReminder.allReminders[currentReminder.allReminders.length - 1].deadline,
       firstDate: DateTime(2022),
       lastDate: DateTime(2024),
+      builder: (context, child) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: Colors.amberAccent, // <-- SEE HERE
+            onPrimary: Colors.redAccent, // <-- SEE HERE
+            onSurface: Colors.blueAccent, // <-- SEE HERE
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              primary: Colors.red, // button text color
+            ),
+          ),
+        ),
+        child: child!,
+      );
+    },
       selectableDayPredicate: (DateTime date) {
         return date.isAfter(initialDate.subtract(Duration(days: 1)));
       },

@@ -1,0 +1,88 @@
+// Reminder obj = widget
+                                          //         .currentReminder.allReminders[
+                                          //     widget.reminderIndex];
+                                          // if (submitReady) {
+                                          //   List<Topic>? subtopics = [];
+                                          //   obj.tag1 = tag1Controller.text;
+                                          //   obj.tag2 = tag2Controller.text;
+                                          //   if (subtitleController.text != '') {
+                                          //     obj.subtitle =
+                                          //         subtitleController.text;
+                                          //   }
+
+                                          //   tag1Controller.clear();
+                                          //   tag2Controller.clear();
+                                          //   subtitleController.clear();
+                                          //   for (int i = 0;
+                                          //       i < topicsController.length;
+                                          //       i++) {
+                                          //     subtopics = [];
+                                          //     if (obj.topics == null) {
+                                          //       obj.topics = [];
+                                          //     }
+                                          //     if (subtopicsController[i] !=
+                                          //         null) {
+                                          //       for (int j = 0;
+                                          //           j <
+                                          //               subtopicsController[i]!
+                                          //                   .length;
+                                          //           j++) {
+                                          //         subtopics.add(Topic(
+                                          //             description:
+                                          //                 subtopicsController[
+                                          //                         i]![j]
+                                          //                     .text));
+                                          //       }
+                                          //     }
+
+                                          //     obj.topics!.add(Topic(
+                                          //         description:
+                                          //             topicsController[i].text,
+                                          //         subTopics: subtopics));
+                                          //     topicsController[i].clear();
+                                          //   }
+                                          //   if (!widget.edit) {
+                                          //     if (obj.deadlineType == 'none') {
+                                          //       for (int i = 0;
+                                          //           i <
+                                          //               widget.weekObject.weeks
+                                          //                   .length;
+                                          //           i++) {
+                                          //         widget.weekObject.weeks[i]
+                                          //             .reminders.allReminders
+                                          //             .add(obj);
+                                          //       }
+                                          //     } else {
+                                          //       widget
+                                          //           .weekObject
+                                          //           .weeks[func.calculateWeekIndex(
+                                          //                   obj.deadline,
+                                          //                   widget
+                                          //                       .initialDate) -
+                                          //               1]
+                                          //           .reminders
+                                          //           .allReminders
+                                          //           .add(obj);
+                                          //     }
+                                          //   }
+                                          //   BlocProvider.of<
+                                          //               ChangeRemindersBloc>(
+                                          //           context)
+                                          //       .add(AddRemindersEvent());
+                                          //   print(widget.currentReminder.allReminders);
+                                          //   print(obj.deadline);
+                                          //   print(widget
+                                          //           .weekObject
+                                          //           .weeks[func.calculateWeekIndex(
+                                          //                   obj.deadline,
+                                          //                   widget
+                                          //                       .initialDate) -
+                                          //               1]
+                                          //           .reminders
+                                          //           .allReminders);
+                                          //   db.putAll({
+                                          //     'reminders':
+                                          //         widget.currentReminder,
+                                          //   });
+                                          //   Navigator.of(context).pop();
+                                          // }

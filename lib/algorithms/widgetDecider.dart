@@ -307,8 +307,6 @@ class WidgetDecider {
                 );
               },
               onDoubleTap: () {
-                print(currentWeek.reminders.allReminders[j].color);
-                print(currentWeek.reminders.allReminders[j].tag1);
                 Navigator.of(context)
                     .push((MaterialPageRoute(builder: (context) {
                   return AddReminderDescriptive(

@@ -55,32 +55,29 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
   @override
   void initState() {
     super.initState();
-
     tag1Controller.addListener(() {
       if (submitReady !=
-          func.checkBeforeSubmission(
-              tag1Controller, tag2Controller)) {
-        submitReady = func.checkBeforeSubmission(
-            tag1Controller, tag2Controller);
+          func.checkBeforeSubmission(tag1Controller, tag2Controller)) {
+        submitReady =
+            func.checkBeforeSubmission(tag1Controller, tag2Controller);
         BlocProvider.of<FixErrorBloc>(context).add(ErrorChangeEvent());
       }
     });
     tag2Controller.addListener(() {
       if (submitReady !=
-          func.checkBeforeSubmission(
-              tag1Controller, tag2Controller)) {
-        submitReady = func.checkBeforeSubmission(
-            tag1Controller, tag2Controller);
+          func.checkBeforeSubmission(tag1Controller, tag2Controller)) {
+        submitReady =
+            func.checkBeforeSubmission(tag1Controller, tag2Controller);
         BlocProvider.of<FixErrorBloc>(context).add(ErrorChangeEvent());
       }
     });
 
     if (widget.edit) {
       Reminder obj = widget.currentReminder.allReminders[widget.reminderIndex];
+      originalDeadlineType = obj.deadlineType;
       editTaskCard = true;
       tag1Controller.text = obj.tag1;
       tag2Controller.text = obj.tag2;
-
       late int index;
       if (obj.deadlineType == 'none') {
         index = 0;
@@ -95,7 +92,6 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
       for (int i = 0; i < isSelected.length; i++) {
         isSelected[i] = i == index;
       }
-
 
       if (widget.currentReminder.allReminders[widget.reminderIndex].topics !=
           null) {
@@ -146,6 +142,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
   bool editTaskCard = false;
   var db = Hive.box('Database');
   bool submitReady = false;
+  String? originalDeadlineType;
 
   int intDeadlineType = 0;
   final List<bool> isSelected = [true, false, false, false];
@@ -396,18 +393,22 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                 child: IconButton(
                   icon: Icon(Icons.delete_rounded,
                       size: 31,
-                      color: widget.reminderIndex ==
-                              widget.currentReminder.allReminders.length - 1
-                          ? Colors.grey
-                          : Colors.white),
+                      color: !widget.edit ? Colors.grey : Colors.white),
                   onPressed: () {
-                    if (widget.reminderIndex !=
-                        widget.currentReminder.allReminders.length - 1) {
+                    if (widget.edit) {
+                      if (originalDeadlineType == 'none') {
+                        func.deleteAllNone(
+                            widget.currentReminder,
+                            widget.weekObject,
+                            widget.currentReminder
+                                .allReminders[widget.reminderIndex]);
+                      } else {
+                        widget.weekObject.weeks[widget.weekSelectedIndex]
+                            .reminders.allReminders
+                            .removeAt(widget.weekReminderIndex);
+                      }
                       widget.currentReminder.allReminders
                           .removeAt(widget.reminderIndex);
-                      widget.weekObject.weeks[widget.weekSelectedIndex]
-                          .reminders.allReminders
-                          .removeAt(widget.weekReminderIndex);
                       BlocProvider.of<ChangeRemindersBloc>(context)
                           .add(AddRemindersEvent());
                       db.putAll({
@@ -473,83 +474,33 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                           top: 5, right: 5, bottom: 20),
                                       child: GestureDetector(
                                         onTap: () {
-                                          Reminder obj = widget
-                                                  .currentReminder.allReminders[
-                                              widget.reminderIndex];
-                                          if (submitReady) {
-                                            List<Topic>? subtopics = [];
-                                            obj.tag1 = tag1Controller.text;
-                                            obj.tag2 = tag2Controller.text;
-                                            if (subtitleController.text != '') {
-                                              obj.subtitle =
-                                                  subtitleController.text;
-                                            }
-
-                                            tag1Controller.clear();
-                                            tag2Controller.clear();
-                                            subtitleController.clear();
-                                            for (int i = 0;
-                                                i < topicsController.length;
-                                                i++) {
-                                              subtopics = [];
-                                              if (obj.topics == null) {
-                                                obj.topics = [];
-                                              }
-                                              if (subtopicsController[i] !=
-                                                  null) {
-                                                for (int j = 0;
-                                                    j <
-                                                        subtopicsController[i]!
-                                                            .length;
-                                                    j++) {
-                                                  subtopics.add(Topic(
-                                                      description:
-                                                          subtopicsController[
-                                                                  i]![j]
-                                                              .text));
-                                                }
-                                              }
-
-                                              obj.topics!.add(Topic(
-                                                  description:
-                                                      topicsController[i].text,
-                                                  subTopics: subtopics));
-                                              topicsController[i].clear();
-                                            }
-                                            if (!widget.edit) {
-                                              if (obj.deadlineType == 'none') {
-                                                for (int i = 0;
-                                                    i <
-                                                        widget.weekObject.weeks
-                                                            .length;
-                                                    i++) {
-                                                  widget.weekObject.weeks[i]
-                                                      .reminders.allReminders
-                                                      .add(obj);
-                                                }
-                                              } else {
-                                                widget
-                                                    .weekObject
-                                                    .weeks[func.calculateWeekIndex(
-                                                            obj.deadline,
-                                                            widget
-                                                                .initialDate) -
-                                                        1]
-                                                    .reminders
-                                                    .allReminders
-                                                    .add(obj);
-                                              }
-                                            }
-                                            BlocProvider.of<
-                                                        ChangeRemindersBloc>(
-                                                    context)
-                                                .add(AddRemindersEvent());
-                                            db.putAll({
-                                              'reminders':
+                                          if (widget.edit) {
+                                            if (originalDeadlineType ==
+                                                'none') {
+                                              func.deleteAllNone(
                                                   widget.currentReminder,
-                                            });
-                                            Navigator.of(context).pop();
+                                                  widget.weekObject,
+                                                  widget.currentReminder
+                                                          .allReminders[
+                                                      widget.reminderIndex]);
+                                            }
                                           }
+                                          func.submit(
+                                              widget.currentReminder,
+                                              widget.reminderIndex,
+                                              submitReady,
+                                              tag1Controller,
+                                              tag2Controller,
+                                              subtitleController,
+                                              topicsController,
+                                              subtopicsController,
+                                              widget.edit,
+                                              widget.weekObject,
+                                              widget.initialDate,
+                                              context,
+                                              db,
+                                              widget.weekSelectedIndex);
+                                          Navigator.of(context).pop();
                                         },
                                         child: BlocBuilder<FixErrorBloc,
                                             FixErrorState>(

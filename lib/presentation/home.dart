@@ -60,10 +60,10 @@ class _HomePageState extends State<HomePage> {
   late int currentWeekIndex;
 
   DateTime appStartDate =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).subtract(Duration(days: 1));
 
   DateTime currentStartDate =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).subtract(Duration(days: 1));
 
   void initialize() {
     // if (db.get('appOpenCount') == null) {
@@ -241,29 +241,29 @@ class _HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(60)),
                         backgroundColor: col.primaryTextColor),
                     onPressed: () {
-                      NotificationService().initializeNotification();
-                      NotificationService()
-                          .showNotification(1, 'hello', 'World');
-                      // allReminders.allReminders.add(Reminder(
-                      //     tag1: '',
-                      //     tag2: '',
-                      //     deadline: selectedDay.selectedDay,
-                      //     deadlineType: 'none',
-                      //     color: Color(0xffb793da),
-                      //     isDescriptive: true,
-                      //     subtitle: 'Topics',
-                      //     topics: null));
+                      // NotificationService().initializeNotification();
+                      // NotificationService()
+                      //     .showNotification(1, 'hello', 'World');
+                      allReminders.allReminders.add(Reminder(
+                          tag1: '',
+                          tag2: '',
+                          deadline: selectedDay.selectedDay,
+                          deadlineType: 'none',
+                          color: Color(0xffb793da),
+                          isDescriptive: true,
+                          subtitle: 'Topics',
+                          topics: null));
 
-                      // Navigator.of(context)
-                      //     .push((MaterialPageRoute(builder: (context) {
-                      //   return AddReminderDescriptive(
-                      //     selectedDay: selectedDay,
-                      //     currentReminder: allReminders,
-                      //     weekObject: weekObject,
-                      //     initialDate: appStartDate,
-                      //     reminderIndex: allReminders.allReminders.length - 1,
-                      //   );
-                      // })));
+                      Navigator.of(context)
+                          .push((MaterialPageRoute(builder: (context) {
+                        return AddReminderDescriptive(
+                          selectedDay: selectedDay,
+                          currentReminder: allReminders,
+                          weekObject: weekObject,
+                          initialDate: appStartDate,
+                          reminderIndex: allReminders.allReminders.length - 1,
+                        );
+                      })));
                     },
                     child: Iconify(addReminder,
                         size: MediaQuery.of(context).size.height * 0.08))));
