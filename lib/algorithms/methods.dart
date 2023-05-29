@@ -17,6 +17,8 @@ import '../data/model/hive_week.dart';
 import '../presentation/widgets/eachDay.dart';
 import '../presentation/widgets/taskCard.dart';
 
+import '../data/services/notification.dart';
+
 class Methods {
   List<Widget> selectedWeek(SelectedDay? setDay, Weeks weekObject,
       int weekSelectedIndex, SelectedDay selectedDay) {
@@ -213,6 +215,7 @@ class Methods {
             .reminders.allReminders
             .add(obj);
       }
+      setNotifications(obj, initialDate, weekObject);
       BlocProvider.of<ChangeRemindersBloc>(context).add(AddRemindersEvent());
       db.putAll({
         'reminders': allReminders,
@@ -225,5 +228,135 @@ class Methods {
     for (int i = 0; i < weekObject.weeks.length; i++) {
       weekObject.weeks[i].reminders.allReminders.remove(reminderToRemove);
     }
+  }
+
+  void setNotifications(Reminder reminder, DateTime initial, Weeks weekObject) {
+    List<int> time_notify = [6, 12, 18, 22];
+
+    DateTime currentDateTime = DateTime.now();
+    DateTime currentDate =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    bool deadlineInCurrentWeek = calculateWeekIndex(currentDate, initial) ==
+        calculateWeekIndex(reminder.deadline, initial);
+
+    print(deadlineInCurrentWeek);
+
+    if (reminder.deadlineType == 'thisWeek') {
+      if (deadlineInCurrentWeek) {
+        DateTime date = currentDate;
+
+        while (date
+                .difference(weekObject
+                    .weeks[calculateWeekIndex(reminder.deadline, initial) - 1]
+                    .sunday)
+                .inDays <=
+            0) {
+          if (currentDate.day == date.day) {
+            //Current Time is not less than 10 pm
+            for (int i = 0; i < time_notify.length; i++) {
+              if (currentDateTime.hour < time_notify[i]) {
+                normalTimesefore10PM(i, date);
+              }
+            }
+            //Current time is more than 10 pm
+            if (currentDateTime.hour > 22) {
+              afterTime10PM(currentDateTime);
+            }
+          } else {
+            for (int i = 0; i < time_notify.length; i++) {
+              normalTimesefore10PM(i, date);
+            }
+          }
+          date = date.add(Duration(days: 1));
+        }
+      } else {
+        DateTime date = weekObject
+            .weeks[calculateWeekIndex(reminder.deadline, initial) - 1].monday;
+        DateTime end = weekObject
+            .weeks[calculateWeekIndex(reminder.deadline, initial) - 1].sunday;
+        while (date.difference(end).inDays <= 0) {
+          for (int i = 0; i < time_notify.length; i++) {
+            normalTimesefore10PM(i, date);
+          }
+          date = date.add(Duration(days: 1));
+        }
+      }
+    } else if (reminder.deadlineType == 'on') {
+      if (currentDate.day == reminder.deadline.day) {
+        //Current Time is not less than 10 pm
+        for (int i = 0; i < time_notify.length; i++) {
+          if (currentDateTime.hour < time_notify[i]) {
+            normalTimesefore10PM(i, reminder.deadline);
+          }
+        }
+        //Current time is more than 10 pm
+        if (currentDateTime.hour > 22) {
+          afterTime10PM(currentDateTime);
+        }
+      } else {
+        for (int i = 0; i < time_notify.length; i++) {
+          normalTimesefore10PM(i, reminder.deadline);
+        }
+      }
+    } else if (reminder.deadlineType == 'before') {
+      if (deadlineInCurrentWeek) {
+        DateTime date = currentDate;
+
+        while (date.difference(reminder.deadline).inDays <= 0) {
+          if (currentDate.day == date.day) {
+            //Current Time is not less than 10 pm
+            for (int i = 0; i < time_notify.length; i++) {
+              if (currentDateTime.hour < time_notify[i]) {
+                normalTimesefore10PM(i, date);
+              }
+            }
+            //Current time is more than 10 pm
+            if (currentDateTime.hour > 22) {
+              afterTime10PM(currentDateTime);
+            }
+          } else {
+            for (int i = 0; i < time_notify.length; i++) {
+              normalTimesefore10PM(i, date);
+            }
+          }
+          date = date.add(Duration(days: 1));
+        }
+      } else {
+        DateTime date = weekObject
+            .weeks[calculateWeekIndex(reminder.deadline, initial) - 1].monday;
+
+        while (date.difference(reminder.deadline).inDays <= 0) {
+          if (currentDate.day == date.day) {
+            //Current Time is not less than 10 pm
+            for (int i = 0; i < time_notify.length; i++) {
+              if (currentDateTime.hour < time_notify[i]) {
+                normalTimesefore10PM(i, date);
+              }
+            }
+            //Current time is more than 10 pm
+            if (currentDateTime.hour > 22) {
+              afterTime10PM(currentDateTime);
+            }
+          } else {
+            for (int i = 0; i < time_notify.length; i++) {
+              normalTimesefore10PM(i, date);
+            }
+          }
+          date = date.add(Duration(days: 1));
+        }
+      }
+    }
+    // NotificationService notify = NotificationService();
+    // notify.initializeNotification();
+    // notify.showNotification(1, reminder.tag1, reminder.tag2, reminder.deadline);
+  }
+
+  void normalTimesefore10PM(int i, DateTime date) {
+    print('Set Notification for $i on ${date.day}');
+  }
+
+  void afterTime10PM(DateTime currentDateTime) {
+    print(
+        'Set Notification for ${currentDateTime.hour + 2} for ${currentDateTime.day}');
   }
 }

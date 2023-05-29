@@ -60,10 +60,10 @@ class _HomePageState extends State<HomePage> {
   late int currentWeekIndex;
 
   DateTime appStartDate =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).subtract(Duration(days: 1));
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
   DateTime currentStartDate =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).subtract(Duration(days: 1));
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
   void initialize() {
     // if (db.get('appOpenCount') == null) {

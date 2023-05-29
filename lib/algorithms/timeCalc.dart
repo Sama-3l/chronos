@@ -100,14 +100,15 @@ class TimeNow {
       builder: (context, child) {
       return Theme(
         data: Theme.of(context).copyWith(
+          dialogBackgroundColor: Colors.grey[800],
           colorScheme: ColorScheme.light(
-            primary: Colors.amberAccent, // <-- SEE HERE
-            onPrimary: Colors.redAccent, // <-- SEE HERE
-            onSurface: Colors.blueAccent, // <-- SEE HERE
+            primary: currentReminder.allReminders[currentReminder.allReminders.length - 1].color, // <-- SEE HERE
+            onPrimary: Colors.white, // <-- SEE HERE
+            onSurface: Colors.white, // <-- SEE HERE
           ),
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
-              primary: Colors.red, // button text color
+              primary: Colors.white, // button text color
             ),
           ),
         ),

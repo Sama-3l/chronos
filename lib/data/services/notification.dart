@@ -20,20 +20,20 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> showNotification(int id, String title, String body) async {
-    var dateTime = DateTime.now();
+  Future<void> showNotification(
+      int id, String title, String body, DateTime dateTime, int notficationID) async {
     tz.initializeTimeZones();
-    print(id);
     await flutterLocalNotificationsPlugin.zonedSchedule(
         id,
         title,
         body,
-        tz.TZDateTime.from(DateTime(2023, 5, 28, 2, 25), tz.local),
+        tz.TZDateTime.from(dateTime, tz.local),
         NotificationDetails(
           android: AndroidNotificationDetails(channel.id, channel.name,
               importance: Importance.max,
               priority: Priority.max,
               ongoing: true,
+              setAsGroupSummary: true,
               icon: '@mipmap/ic_launcher',
               styleInformation: BigTextStyleInformation(
                 'Additional Information',
@@ -42,28 +42,13 @@ class NotificationService {
                 summaryText: 'Chronos',
               )),
         ),
-        // NotificationDetails(
-        //   android: AndroidNotificationDetails(id.toString(), 'Go To Bed',
-        //       importance: Importance.max,
-        //       priority: Priority.max,
-        //       groupKey: "Reminders",
-        //       setAsGroupSummary: true,
-        //       icon: '@mipmap/ic_launcher',
-        //       styleInformation: BigTextStyleInformation(
-        //         'Additional Information',
-        //         contentTitle:
-        //             'This is the expanded text content of the notification.',
-        //         summaryText: 'Chronos',
-        //       )),
-        // ),
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         androidAllowWhileIdle: true,
         matchDateTimeComponents: DateTimeComponents.time);
+  }
 
-    print(await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.getActiveNotifications());
+  void cancelNotification(int id) {
+    flutterLocalNotificationsPlugin.cancel(id);
   }
 }
