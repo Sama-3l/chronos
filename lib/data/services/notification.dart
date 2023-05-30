@@ -20,11 +20,11 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> showNotification(
-      int id, String title, String body, DateTime dateTime, int notficationID) async {
+  Future<void> showNotification(String title, String body,
+      DateTime dateTime, int notificationID) async {
     tz.initializeTimeZones();
     await flutterLocalNotificationsPlugin.zonedSchedule(
-        id,
+        notificationID,
         title,
         body,
         tz.TZDateTime.from(dateTime, tz.local),
@@ -32,23 +32,23 @@ class NotificationService {
           android: AndroidNotificationDetails(channel.id, channel.name,
               importance: Importance.max,
               priority: Priority.max,
-              ongoing: true,
               setAsGroupSummary: true,
               icon: '@mipmap/ic_launcher',
               styleInformation: BigTextStyleInformation(
-                'Additional Information',
-                contentTitle:
-                    'This is the expanded text content of the notification.',
-                summaryText: 'Chronos',
+                body,
               )),
         ),
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         androidAllowWhileIdle: true,
-        matchDateTimeComponents: DateTimeComponents.time);
+        matchDateTimeComponents: DateTimeComponents.dateAndTime);
   }
 
-  void cancelNotification(int id) {
+  void cancelNotifications(int id) {
     flutterLocalNotificationsPlugin.cancel(id);
+  }
+
+  void cancelAll(){
+    flutterLocalNotificationsPlugin.cancelAll();
   }
 }

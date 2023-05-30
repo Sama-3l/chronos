@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 
 import '../business_logic/blocs/change_reminder/change_reminders_bloc.dart';
 import '../data/model/hive_topic.dart';
+import '../data/model/notificationID.dart';
 import '../data/model/selectedDay.dart';
 import '../data/model/hive_week.dart';
 import '../presentation/widgets/eachDay.dart';
@@ -20,6 +21,7 @@ import '../presentation/widgets/taskCard.dart';
 import '../data/services/notification.dart';
 
 class Methods {
+  NotificationService notify = NotificationService();
   List<Widget> selectedWeek(SelectedDay? setDay, Weeks weekObject,
       int weekSelectedIndex, SelectedDay selectedDay) {
     List<Widget> weekDays = [];
@@ -108,18 +110,21 @@ class Methods {
         }
       } else if (weekObject
               .weeks[calculateWeekIndex(allReminders.allReminders[i].deadline,
-                  weekObject.weeks[0].sunday)]
+                      weekObject.weeks[0].sunday) -
+                  1]
               .reminders ==
           null) {
         weekObject
                 .weeks[calculateWeekIndex(allReminders.allReminders[i].deadline,
-                    weekObject.weeks[0].sunday)]
+                        weekObject.weeks[0].sunday) -
+                    1]
                 .reminders =
             Reminders(allReminders: [allReminders.allReminders[i]]);
       } else {
         weekObject
             .weeks[calculateWeekIndex(allReminders.allReminders[i].deadline,
-                weekObject.weeks[0].sunday)]
+                    weekObject.weeks[0].sunday) -
+                1]
             .reminders
             .allReminders
             .add(allReminders.allReminders[i]);
@@ -167,7 +172,8 @@ class Methods {
       DateTime initialDate,
       BuildContext context,
       var db,
-      int originalWeekIndex) {
+      int originalWeekIndex,
+      NotificationID id) {
     Reminder obj = allReminders.allReminders[reminderIndex];
     if (submitReady) {
       List<Topic>? subtopics = [];
@@ -215,11 +221,10 @@ class Methods {
             .reminders.allReminders
             .add(obj);
       }
-      setNotifications(obj, initialDate, weekObject);
+      setNotifications(obj, initialDate, weekObject, id, edit);
       BlocProvider.of<ChangeRemindersBloc>(context).add(AddRemindersEvent());
-      db.putAll({
-        'reminders': allReminders,
-      });
+      db.putAll(
+          {'reminders': allReminders, 'notifications': id.notificationID});
     }
   }
 
@@ -230,16 +235,17 @@ class Methods {
     }
   }
 
-  void setNotifications(Reminder reminder, DateTime initial, Weeks weekObject) {
+  void setNotifications(Reminder reminder, DateTime initial, Weeks weekObject,
+      NotificationID id, bool edit) {
+    if (edit) {
+      reminder.notificationIDs = null;
+    }
     List<int> time_notify = [6, 12, 18, 22];
-
     DateTime currentDateTime = DateTime.now();
     DateTime currentDate =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     bool deadlineInCurrentWeek = calculateWeekIndex(currentDate, initial) ==
         calculateWeekIndex(reminder.deadline, initial);
-
-    print(deadlineInCurrentWeek);
 
     if (reminder.deadlineType == 'thisWeek') {
       if (deadlineInCurrentWeek) {
@@ -255,16 +261,16 @@ class Methods {
             //Current Time is not less than 10 pm
             for (int i = 0; i < time_notify.length; i++) {
               if (currentDateTime.hour < time_notify[i]) {
-                normalTimesefore10PM(i, date);
+                normalTimesefore10PM(reminder, id, date, time_notify[i]);
               }
             }
             //Current time is more than 10 pm
             if (currentDateTime.hour > 22) {
-              afterTime10PM(currentDateTime);
+              afterTime10PM(reminder, id, currentDateTime);
             }
           } else {
             for (int i = 0; i < time_notify.length; i++) {
-              normalTimesefore10PM(i, date);
+              normalTimesefore10PM(reminder, id, date, time_notify[i]);
             }
           }
           date = date.add(Duration(days: 1));
@@ -276,7 +282,7 @@ class Methods {
             .weeks[calculateWeekIndex(reminder.deadline, initial) - 1].sunday;
         while (date.difference(end).inDays <= 0) {
           for (int i = 0; i < time_notify.length; i++) {
-            normalTimesefore10PM(i, date);
+            normalTimesefore10PM(reminder, id, date, time_notify[i]);
           }
           date = date.add(Duration(days: 1));
         }
@@ -286,16 +292,17 @@ class Methods {
         //Current Time is not less than 10 pm
         for (int i = 0; i < time_notify.length; i++) {
           if (currentDateTime.hour < time_notify[i]) {
-            normalTimesefore10PM(i, reminder.deadline);
+            normalTimesefore10PM(
+                reminder, id, reminder.deadline, time_notify[i]);
           }
         }
         //Current time is more than 10 pm
         if (currentDateTime.hour > 22) {
-          afterTime10PM(currentDateTime);
+          afterTime10PM(reminder, id, currentDateTime);
         }
       } else {
         for (int i = 0; i < time_notify.length; i++) {
-          normalTimesefore10PM(i, reminder.deadline);
+          normalTimesefore10PM(reminder, id, reminder.deadline, time_notify[i]);
         }
       }
     } else if (reminder.deadlineType == 'before') {
@@ -307,16 +314,16 @@ class Methods {
             //Current Time is not less than 10 pm
             for (int i = 0; i < time_notify.length; i++) {
               if (currentDateTime.hour < time_notify[i]) {
-                normalTimesefore10PM(i, date);
+                normalTimesefore10PM(reminder, id, date, time_notify[i]);
               }
             }
             //Current time is more than 10 pm
             if (currentDateTime.hour > 22) {
-              afterTime10PM(currentDateTime);
+              afterTime10PM(reminder, id, currentDateTime);
             }
           } else {
             for (int i = 0; i < time_notify.length; i++) {
-              normalTimesefore10PM(i, date);
+              normalTimesefore10PM(reminder, id, date, time_notify[i]);
             }
           }
           date = date.add(Duration(days: 1));
@@ -330,33 +337,59 @@ class Methods {
             //Current Time is not less than 10 pm
             for (int i = 0; i < time_notify.length; i++) {
               if (currentDateTime.hour < time_notify[i]) {
-                normalTimesefore10PM(i, date);
+                normalTimesefore10PM(reminder, id, date, time_notify[i]);
               }
             }
             //Current time is more than 10 pm
             if (currentDateTime.hour > 22) {
-              afterTime10PM(currentDateTime);
+              afterTime10PM(reminder, id, currentDateTime);
             }
           } else {
             for (int i = 0; i < time_notify.length; i++) {
-              normalTimesefore10PM(i, date);
+              normalTimesefore10PM(reminder, id, date, time_notify[i]);
             }
           }
           date = date.add(Duration(days: 1));
         }
       }
     }
-    // NotificationService notify = NotificationService();
-    // notify.initializeNotification();
-    // notify.showNotification(1, reminder.tag1, reminder.tag2, reminder.deadline);
   }
 
-  void normalTimesefore10PM(int i, DateTime date) {
-    print('Set Notification for $i on ${date.day}');
+  void normalTimesefore10PM(
+      Reminder reminder, NotificationID id, DateTime date, int hour) {
+    notify.initializeNotification();
+
+    reminder.notificationIDs ??= [];
+    reminder.notificationIDs!.add(id.notificationID!);
+    DateTime dateWithTime = DateTime(date.year, date.month, date.day, hour);
+    notify.showNotification(
+        "Today's Reminders",
+        "${reminder.tag1} + ${reminder.tag2}",
+        reminder.deadline,
+        id.notificationID!);
+    id.notificationID = id.notificationID! + 1;
   }
 
-  void afterTime10PM(DateTime currentDateTime) {
-    print(
-        'Set Notification for ${currentDateTime.hour + 2} for ${currentDateTime.day}');
+  void afterTime10PM(
+      Reminder reminder, NotificationID id, DateTime currentDateTime) {
+    notify.initializeNotification();
+    reminder.notificationIDs ??= [];
+    reminder.notificationIDs!.add(id.notificationID!);
+    DateTime dateWithTime = DateTime(
+        currentDateTime.year, currentDateTime.month, currentDateTime.day, 22);
+    notify.showNotification(
+        "Today's Reminders",
+        "${reminder.tag1} + ${reminder.tag2}",
+        reminder.deadline,
+        id.notificationID!);
+    id.notificationID = id.notificationID! + 1;
+  }
+
+  void cancelNotifications(Reminder reminder) {
+    if (reminder.deadlineType != "none") {
+      for (int i = 0; i < reminder.notificationIDs!.length; i++) {
+        notify.cancelNotifications(reminder.notificationIDs![i]);
+      }
+    }
   }
 }

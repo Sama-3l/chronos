@@ -14,7 +14,8 @@ class Reminder {
       required this.deadline,
       required this.subtitle,
       required this.deadlineType,
-      this.topics});
+      this.topics,
+      this.notificationIDs});
 
   @HiveField(0)
   bool isDescriptive;
@@ -39,4 +40,7 @@ class Reminder {
 
   @HiveField(7)
   List<Topic>? topics;
+
+  @HiveField(8)
+  List<int>? notificationIDs;
 }

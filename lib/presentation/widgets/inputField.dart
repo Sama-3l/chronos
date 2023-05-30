@@ -29,6 +29,7 @@ class _InputFieldState extends State<InputField> {
       padding: EdgeInsets.only(left: widget.left, right: widget.right),
       child: TextField(
         controller: widget.controller,
+        textCapitalization: TextCapitalization.words,
         cursorColor: Color(0xff1f1f1f),
         scrollPadding: EdgeInsets.only(bottom: 40),
         style: GoogleFonts.questrial(

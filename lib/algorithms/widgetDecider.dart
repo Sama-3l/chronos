@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:chronos/algorithms/methods.dart';
 import 'package:chronos/constants/colors.dart';
 import 'package:chronos/data/model/currentSessionReminders.dart';
 import 'package:chronos/data/model/hive_reminder.dart';
@@ -13,6 +14,7 @@ import 'package:intl/intl.dart';
 
 import '../business_logic/blocs/change_color/change_color_bloc.dart';
 import '../business_logic/blocs/change_reminder/change_reminders_bloc.dart';
+import '../data/model/notificationID.dart';
 import '../data/model/selectedDay.dart';
 import '../data/model/hive_week.dart';
 import '../presentation/pages/addReminder.dart';
@@ -238,8 +240,10 @@ class WidgetDecider {
       BuildContext context,
       DateTime appStartDate,
       NumberOfReminders count,
-      var db) {
+      var db,
+      NotificationID id) {
     Week currentWeek = weekObject.weeks[weekSelectedIndex];
+    Methods func = Methods();
     List<Widget> taskList = [];
     if (currentWeek.reminders != null) {
       for (int j = 0; j < currentWeek.reminders.allReminders.length; j++) {
@@ -279,10 +283,20 @@ class WidgetDecider {
               ),
             ),
             onDismissed: (direction) {
+              func.cancelNotifications(allReminders.allReminders[allReminders
+                  .allReminders
+                  .indexOf(currentWeek.reminders.allReminders[j])]);
               allReminders.allReminders
                   .remove(currentWeek.reminders.allReminders[j]);
-              weekObject.weeks[weekSelectedIndex].reminders.allReminders
-                  .remove(currentWeek.reminders.allReminders[j]);
+
+              if (currentWeek.reminders.allReminders[j].deadlineType ==
+                  'none') {
+                func.deleteAllNone(allReminders, weekObject,
+                    currentWeek.reminders.allReminders[j]);
+              } else {
+                weekObject.weeks[weekSelectedIndex].reminders.allReminders
+                    .remove(currentWeek.reminders.allReminders[j]);
+              }
               BlocProvider.of<ChangeRemindersBloc>(context)
                   .add(AddRemindersEvent());
               db.putAll({
@@ -290,9 +304,8 @@ class WidgetDecider {
               });
 
               if (direction == DismissDirection.endToStart) {
-                print('Delete');
               } else if (direction == DismissDirection.startToEnd) {
-                print('Done');
+                //Store completed tasks maybe?
               }
             },
             child: GestureDetector(
@@ -318,7 +331,8 @@ class WidgetDecider {
                           .indexOf(currentWeek.reminders.allReminders[j]),
                       weekSelectedIndex: weekSelectedIndex,
                       weekReminderIndex: j,
-                      edit: true);
+                      edit: true,
+                      id: id);
                 })));
               },
               child: TaskCard(

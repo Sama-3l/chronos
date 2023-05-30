@@ -27,6 +27,7 @@ import 'package:intl/intl.dart';
 
 import '../business_logic/blocs/change_reminder/change_reminders_bloc.dart';
 import '../business_logic/blocs/change_week/change_week_bloc.dart';
+import '../data/model/notificationID.dart';
 import 'widgets/eachDay.dart';
 
 import 'package:chronos/data/services/notification.dart';
@@ -48,6 +49,7 @@ class _HomePageState extends State<HomePage> {
   Methods func = Methods();
   WidgetDecider wd = WidgetDecider();
   NumberOfReminders count = NumberOfReminders(count: 0);
+  NotificationID notificationID = NotificationID();
 
   List<Widget> taskList = [];
   int weekSelectedIndex = 0;
@@ -66,26 +68,23 @@ class _HomePageState extends State<HomePage> {
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
   void initialize() {
-    // if (db.get('appOpenCount') == null) {
-    //   db.putAll({
-    //     'appOpenCount': 0,
-    //     'initialDate': appStartDate,
-    //     'reminders': allReminders,
-    //   });
-    // } else {
-    //   allReminders = db.get('reminders');
-    //   appStartDate = db.get('initialDate');
-    // }
-    // if (db.get('appOpenCount') < 10000) {
-    //   db.putAll({'appOpenCount': db.get('appOpenCount') + 1});
-    // }
-    db.delete('appOpenCount');
-    db.delete('reminders');
-    db.delete('initialDate');
-    // db.delete('weeks');
-    print(db.get('appOpenCount'));
-    print(db.get('initialDate'));
-    print(db.get('reminders'));
+    notificationID.notificationID = 0;
+    if (db.get('appOpenCount') == null) {
+      db.putAll({
+        'appOpenCount': 0,
+        'initialDate': appStartDate,
+        'reminders': allReminders,
+        'notifications' : 0
+      });
+    } else {
+      allReminders = db.get('reminders');
+      appStartDate = db.get('initialDate');
+      notificationID.notificationID = db.get('notifications');
+    }
+    if (db.get('appOpenCount') < 10000) {
+      db.putAll({'appOpenCount': db.get('appOpenCount') + 1});
+    }
+    
     weekObject = time.initializeWeeks(appStartDate);
 
     func.initializeWeeklyReminders(allReminders, weekObject);
@@ -131,10 +130,10 @@ class _HomePageState extends State<HomePage> {
           weekDays = func.selectedWeek(
               state.selectedDay, weekObject, weekSelectedIndex, selectedDay);
           taskList = wd.currentDayTasks(weekObject, weekSelectedIndex,
-              selectedDay, allReminders, context, appStartDate, count, db);
+              selectedDay, allReminders, context, appStartDate, count, db, notificationID);
         } else {
           taskList = wd.currentDayTasks(weekObject, weekSelectedIndex,
-              selectedDay, allReminders, context, appStartDate, count, db);
+              selectedDay, allReminders, context, appStartDate, count, db, notificationID);
         }
         return Scaffold(
             backgroundColor: col.appColor,
@@ -180,15 +179,21 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 actions: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        top: 15, left: 15, right: 15, bottom: 15),
-                    child: Container(
-                      height: 70,
-                      width: 70,
-                      decoration: BoxDecoration(
-                          color: col.whiteFieldColor,
-                          borderRadius: BorderRadius.circular(70)),
+                  GestureDetector(
+                    onTap: () {
+                      NotificationService notify = NotificationService();
+                      notify.cancelAll();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          top: 15, left: 15, right: 15, bottom: 15),
+                      child: Container(
+                        height: 70,
+                        width: 70,
+                        decoration: BoxDecoration(
+                            color: col.whiteFieldColor,
+                            borderRadius: BorderRadius.circular(70)),
+                      ),
                     ),
                   ),
                 ],
@@ -205,7 +210,8 @@ class _HomePageState extends State<HomePage> {
                     context,
                     appStartDate,
                     count,
-                    db);
+                    db,
+                    notificationID);
                 return CustomScrollView(controller: _controller, slivers: [
                   SliverAppBar(
                     pinned: true,
@@ -241,9 +247,6 @@ class _HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(60)),
                         backgroundColor: col.primaryTextColor),
                     onPressed: () {
-                      // NotificationService().initializeNotification();
-                      // NotificationService()
-                      //     .showNotification(1, 'hello', 'World');
                       allReminders.allReminders.add(Reminder(
                           tag1: '',
                           tag2: '',
@@ -262,6 +265,7 @@ class _HomePageState extends State<HomePage> {
                           weekObject: weekObject,
                           initialDate: appStartDate,
                           reminderIndex: allReminders.allReminders.length - 1,
+                          id: notificationID,
                         );
                       })));
                     },

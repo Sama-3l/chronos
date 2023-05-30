@@ -25,13 +25,14 @@ class ReminderAdapter extends TypeAdapter<Reminder> {
       subtitle: fields[6] as String,
       deadlineType: fields[4] as String,
       topics: (fields[7] as List?)?.cast<Topic>(),
+      notificationIDs: (fields[8] as List?)?.cast<int>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Reminder obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.isDescriptive)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class ReminderAdapter extends TypeAdapter<Reminder> {
       ..writeByte(6)
       ..write(obj.subtitle)
       ..writeByte(7)
-      ..write(obj.topics);
+      ..write(obj.topics)
+      ..writeByte(8)
+      ..write(obj.notificationIDs);
   }
 
   @override

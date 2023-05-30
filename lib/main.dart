@@ -15,13 +15,19 @@ import 'package:chronos/data/model/hive_week.dart';
 import 'package:chronos/data/repositories/hive_allReminders.dart';
 import 'package:chronos/data/repositories/hive_weeks.dart';
 import 'package:chronos/presentation/home.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('google_fonts/OFL.txt');
+    yield LicenseEntryWithLineBreaks(['google_fonts'], license);
+  });
   Hive.registerAdapter(ColorAdapter());
   Hive.registerAdapter(DateTimeAdapter());
   Hive.registerAdapter(ReminderAdapter());

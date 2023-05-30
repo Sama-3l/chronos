@@ -22,6 +22,7 @@ import '../../business_logic/blocs/date_selected/date_selected_bloc.dart';
 import '../../business_logic/blocs/toggle_buttons/toggle_buttons_bloc.dart';
 import '../../constants/colors.dart';
 import '../../data/model/hive_reminder.dart';
+import '../../data/model/notificationID.dart';
 import '../../data/model/selectedDay.dart';
 import '../../data/repositories/hive_allReminders.dart';
 import '../widgets/inputField.dart';
@@ -36,7 +37,8 @@ class AddReminderDescriptive extends StatefulWidget {
       this.reminderIndex = -1,
       this.weekSelectedIndex = -1,
       this.weekReminderIndex = -1,
-      this.edit = false});
+      this.edit = false,
+      required this.id});
 
   Reminders currentReminder;
   SelectedDay selectedDay;
@@ -46,6 +48,7 @@ class AddReminderDescriptive extends StatefulWidget {
   int weekSelectedIndex;
   int weekReminderIndex;
   bool edit;
+  NotificationID id;
 
   @override
   State<AddReminderDescriptive> createState() => _AddReminderDescriptiveState();
@@ -56,6 +59,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
   void initState() {
     super.initState();
     tag1Controller.addListener(() {
+      _onTextChanged(tag1Controller);
       if (submitReady !=
           func.checkBeforeSubmission(tag1Controller, tag2Controller)) {
         submitReady =
@@ -64,12 +68,16 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
       }
     });
     tag2Controller.addListener(() {
+      _onTextChanged(tag2Controller);
       if (submitReady !=
           func.checkBeforeSubmission(tag1Controller, tag2Controller)) {
         submitReady =
             func.checkBeforeSubmission(tag1Controller, tag2Controller);
         BlocProvider.of<FixErrorBloc>(context).add(ErrorChangeEvent());
       }
+    });
+    subtitleController.addListener(() {
+      _onTextChanged(subtitleController);
     });
 
     if (widget.edit) {
@@ -146,6 +154,20 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
 
   int intDeadlineType = 0;
   final List<bool> isSelected = [true, false, false, false];
+
+  void _onTextChanged(TextEditingController _textEditingController) {
+    final text = _textEditingController.text;
+    final sanitizedText = text.replaceAll(' ', ''); // Remove spaces
+
+    if (text != sanitizedText) {
+      final cursorPosition = _textEditingController.selection.baseOffset -
+          (text.length - sanitizedText.length);
+      _textEditingController.value = TextEditingValue(
+        text: sanitizedText,
+        selection: TextSelection.collapsed(offset: cursorPosition),
+      );
+    }
+  }
 
   List<Widget> getTopics(BuildContext context) {
     List<Widget> topics = [];
@@ -318,7 +340,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
               icon: Icon(Icons.arrow_back_ios_new_rounded,
                   size: 31, color: Colors.white),
               onPressed: () {
-                if (widget.reminderIndex == -1) {
+                if (!widget.edit) {
                   widget.currentReminder.allReminders
                       .removeAt(widget.reminderIndex);
                 }
@@ -407,6 +429,8 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                             .reminders.allReminders
                             .removeAt(widget.weekReminderIndex);
                       }
+                      func.cancelNotifications(widget
+                          .currentReminder.allReminders[widget.reminderIndex]);
                       widget.currentReminder.allReminders
                           .removeAt(widget.reminderIndex);
                       BlocProvider.of<ChangeRemindersBloc>(context)
@@ -499,7 +523,8 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                               widget.initialDate,
                                               context,
                                               db,
-                                              widget.weekSelectedIndex);
+                                              widget.weekSelectedIndex,
+                                              widget.id);
                                           Navigator.of(context).pop();
                                         },
                                         child: BlocBuilder<FixErrorBloc,
@@ -710,8 +735,8 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                                           padding:
                                                               const EdgeInsets
                                                                       .only(
-                                                                  left: 5,
-                                                                  right: 5),
+                                                                  left: 10,
+                                                                  right: 10),
                                                           child: AutoSizeText(
                                                             widget.edit
                                                                 ? func.getSelectedDate(widget
