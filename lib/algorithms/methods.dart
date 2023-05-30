@@ -89,11 +89,6 @@ class Methods {
     } else {
       return (date.difference(initial).inDays / 7).ceil();
     }
-    // if (date.difference(initial).inDays == -7) {
-    //   return 0;
-    // } else {
-    //   return ((date.difference(initial).inDays) / 7).ceil();
-    // }
   }
 
   void initializeWeeklyReminders(Reminders allReminders, Weeks weekObject) {
