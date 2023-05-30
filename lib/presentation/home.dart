@@ -50,6 +50,7 @@ class _HomePageState extends State<HomePage> {
   WidgetDecider wd = WidgetDecider();
   NumberOfReminders count = NumberOfReminders(count: 0);
   NotificationID notificationID = NotificationID();
+  ScrollController controller = ScrollController();
 
   List<Widget> taskList = [];
   int weekSelectedIndex = 0;
@@ -74,7 +75,7 @@ class _HomePageState extends State<HomePage> {
         'appOpenCount': 0,
         'initialDate': appStartDate,
         'reminders': allReminders,
-        'notifications' : 0
+        'notifications': 0
       });
     } else {
       allReminders = db.get('reminders');
@@ -84,7 +85,7 @@ class _HomePageState extends State<HomePage> {
     if (db.get('appOpenCount') < 10000) {
       db.putAll({'appOpenCount': db.get('appOpenCount') + 1});
     }
-    
+
     weekObject = time.initializeWeeks(appStartDate);
 
     func.initializeWeeklyReminders(allReminders, weekObject);
@@ -129,11 +130,27 @@ class _HomePageState extends State<HomePage> {
           weekSelectedIndex = selectedDay.selectedWeekIndex;
           weekDays = func.selectedWeek(
               state.selectedDay, weekObject, weekSelectedIndex, selectedDay);
-          taskList = wd.currentDayTasks(weekObject, weekSelectedIndex,
-              selectedDay, allReminders, context, appStartDate, count, db, notificationID);
+          taskList = wd.currentDayTasks(
+              weekObject,
+              weekSelectedIndex,
+              selectedDay,
+              allReminders,
+              context,
+              appStartDate,
+              count,
+              db,
+              notificationID);
         } else {
-          taskList = wd.currentDayTasks(weekObject, weekSelectedIndex,
-              selectedDay, allReminders, context, appStartDate, count, db, notificationID);
+          taskList = wd.currentDayTasks(
+              weekObject,
+              weekSelectedIndex,
+              selectedDay,
+              allReminders,
+              context,
+              appStartDate,
+              count,
+              db,
+              notificationID);
         }
         return Scaffold(
             backgroundColor: col.appColor,
@@ -222,7 +239,9 @@ class _HomePageState extends State<HomePage> {
                     title: ListOfWeeks(
                         weekObject: weekObject,
                         col: col,
-                        selectedDay: selectedDay),
+                        selectedDay: selectedDay,
+                        controller: controller,
+                        weekSelectedIndex: weekSelectedIndex),
                   ),
                   SliverPersistentHeader(
                       pinned: sliverPersistentHeader,
