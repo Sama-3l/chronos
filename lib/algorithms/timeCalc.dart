@@ -14,7 +14,7 @@ import '../data/model/selectedDay.dart';
 class TimeNow {
   Weeks initializeWeeks(DateTime start) {
     return getWeeksForRange(DateTime.utc(start.year, start.month, start.day),
-        DateTime.utc(start.year + 1, start.month, start.day));
+        DateTime.utc(start.year + 2, start.month, start.day));
   }
 
   Weeks getWeeksForRange(DateTime start, DateTime end) {
@@ -58,7 +58,7 @@ class TimeNow {
       context: context,
       initialDate: selectedDay.selectedDay,
       firstDate: DateTime(2022),
-      lastDate: DateTime(2024),
+      lastDate: DateTime(2027),
       builder: (context, child) {
       return Theme(
         data: Theme.of(context).copyWith(
@@ -96,7 +96,7 @@ class TimeNow {
       context: context,
       initialDate: currentReminder.allReminders[currentReminder.allReminders.length - 1].deadline,
       firstDate: DateTime(2022),
-      lastDate: DateTime(2024),
+      lastDate: DateTime(2027),
       builder: (context, child) {
       return Theme(
         data: Theme.of(context).copyWith(

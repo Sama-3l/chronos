@@ -387,4 +387,16 @@ class Methods {
       }
     }
   }
+
+  DateTime changeInitialDate(Weeks weekObject, DateTime appStartDate) {
+    DateTime currentDate =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+
+    if ((calculateWeekIndex(currentDate, appStartDate) - 1) % 4 == 0 &&
+        (calculateWeekIndex(currentDate, appStartDate) - 1 > 0)) {
+      appStartDate = weekObject
+          .weeks[calculateWeekIndex(currentDate, appStartDate) - 1].monday;
+    }
+    return appStartDate;
+  }
 }

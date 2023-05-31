@@ -93,6 +93,10 @@ class _HomePageState extends State<HomePage> {
     weekSelectedIndex =
         func.calculateWeekIndex(currentStartDate, appStartDate) - 1;
 
+    if (appStartDate != func.changeInitialDate(weekObject, appStartDate)) {
+      appStartDate = func.changeInitialDate(weekObject, appStartDate);
+      db.putAll({'initialDate': appStartDate});
+    }
     currentWeekIndex = weekSelectedIndex;
 
     selectedDay = SelectedDay(

@@ -56,6 +56,7 @@ class _ListOfWeeksState extends State<ListOfWeeks> {
           child: ListView.builder(
               controller: widget.controller,
               scrollDirection: Axis.horizontal,
+              itemCount: widget.weekObject.weeks.length,
               itemBuilder: (context, index) {
                 if (index == 0) {
                   changeMonth = true;
