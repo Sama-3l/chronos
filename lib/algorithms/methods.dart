@@ -370,12 +370,11 @@ class Methods {
     notify.initializeNotification();
     reminder.notificationIDs ??= [];
     reminder.notificationIDs!.add(id.notificationID!);
-    DateTime dateWithTime = DateTime(
-        currentDateTime.year, currentDateTime.month, currentDateTime.day, 22);
+    DateTime dateWithTime = DateTime.now().add(Duration(minutes: 30));
     notify.showNotification(
         "Today's Reminders",
         "${reminder.tag1} + ${reminder.tag2}",
-        reminder.deadline,
+        dateWithTime,
         id.notificationID!);
     id.notificationID = id.notificationID! + 1;
   }

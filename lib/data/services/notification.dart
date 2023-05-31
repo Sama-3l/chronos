@@ -14,7 +14,7 @@ class NotificationService {
 
   Future<void> initializeNotification() async {
     AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@drawable/notifychronos');
     InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
@@ -33,7 +33,7 @@ class NotificationService {
               importance: Importance.max,
               priority: Priority.max,
               setAsGroupSummary: true,
-              icon: '@mipmap/ic_launcher',
+              icon: '@drawable/notifychronos',
               styleInformation: BigTextStyleInformation(
                 body,
               )),
