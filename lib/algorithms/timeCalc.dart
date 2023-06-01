@@ -13,8 +13,8 @@ import '../data/model/selectedDay.dart';
 
 class TimeNow {
   Weeks initializeWeeks(DateTime start) {
-    return getWeeksForRange(DateTime.utc(start.year, start.month, start.day),
-        DateTime.utc(start.year + 2, start.month, start.day));
+    return getWeeksForRange(DateTime(start.year, start.month, start.day),
+        DateTime(start.year + 2, start.month, start.day));
   }
 
   Weeks getWeeksForRange(DateTime start, DateTime end) {

@@ -357,11 +357,8 @@ class Methods {
     reminder.notificationIDs ??= [];
     reminder.notificationIDs!.add(id.notificationID!);
     DateTime dateWithTime = DateTime(date.year, date.month, date.day, hour);
-    notify.showNotification(
-        "Today's Reminders",
-        "${reminder.tag1} + ${reminder.tag2}",
-        reminder.deadline,
-        id.notificationID!);
+    notify.showNotification("Today's Reminders",
+        "${reminder.tag1} ${reminder.tag2}", dateWithTime, id.notificationID!);
     id.notificationID = id.notificationID! + 1;
   }
 
@@ -371,11 +368,8 @@ class Methods {
     reminder.notificationIDs ??= [];
     reminder.notificationIDs!.add(id.notificationID!);
     DateTime dateWithTime = DateTime.now().add(Duration(minutes: 30));
-    notify.showNotification(
-        "Today's Reminders",
-        "${reminder.tag1} + ${reminder.tag2}",
-        dateWithTime,
-        id.notificationID!);
+    notify.showNotification("Today's Reminders",
+        "${reminder.tag1} ${reminder.tag2}", dateWithTime, id.notificationID!);
     id.notificationID = id.notificationID! + 1;
   }
 

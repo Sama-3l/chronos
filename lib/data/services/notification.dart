@@ -20,9 +20,10 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> showNotification(String title, String body,
-      DateTime dateTime, int notificationID) async {
+  Future<void> showNotification(
+      String title, String body, DateTime dateTime, int notificationID) async {
     tz.initializeTimeZones();
+
     await flutterLocalNotificationsPlugin.zonedSchedule(
         notificationID,
         title,
@@ -48,7 +49,7 @@ class NotificationService {
     flutterLocalNotificationsPlugin.cancel(id);
   }
 
-  void cancelAll(){
+  void cancelAll() {
     flutterLocalNotificationsPlugin.cancelAll();
   }
 }

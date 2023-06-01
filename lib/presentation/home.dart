@@ -214,6 +214,8 @@ class _HomePageState extends State<HomePage> {
                         decoration: BoxDecoration(
                             color: col.whiteFieldColor,
                             borderRadius: BorderRadius.circular(70)),
+                        child: Icon(Icons.notifications_off_rounded,
+                            size: 35, color: Color(0xff1f1f1f)),
                       ),
                     ),
                   ),
