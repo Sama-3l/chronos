@@ -171,6 +171,7 @@ class Methods {
       NotificationID id) {
     Reminder obj = allReminders.allReminders[reminderIndex];
     if (submitReady) {
+      obj.topics = [];
       List<Topic>? subtopics = [];
       obj.tag1 = tag1Controller.text;
       obj.tag2 = tag2Controller.text;
@@ -181,6 +182,7 @@ class Methods {
       tag1Controller.clear();
       tag2Controller.clear();
       subtitleController.clear();
+      print(topicsController.length);
       for (int i = 0; i < topicsController.length; i++) {
         subtopics = [];
         obj.topics ??= [];

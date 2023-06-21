@@ -253,8 +253,8 @@ class WidgetDecider {
             key: Key(count.count.toString()),
             direction: DismissDirection.horizontal,
             dismissThresholds: {
-              DismissDirection.endToStart: 0.75,
-              DismissDirection.startToEnd: 0.75,
+              DismissDirection.endToStart: 0.85,
+              DismissDirection.startToEnd: 0.85,
             },
             secondaryBackground: Container(
               margin: EdgeInsets.only(top: 30, bottom: 40),

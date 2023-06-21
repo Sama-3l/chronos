@@ -11,12 +11,14 @@ class InputField extends StatefulWidget {
       required this.controller,
       required this.hintText,
       required this.left,
-      required this.right});
+      required this.right,
+      this.isSubTopic = false});
 
   TextEditingController controller;
   String hintText;
   double left;
   double right;
+  bool isSubTopic;
 
   @override
   State<InputField> createState() => _InputFieldState();
@@ -29,9 +31,12 @@ class _InputFieldState extends State<InputField> {
       padding: EdgeInsets.only(left: widget.left, right: widget.right),
       child: TextField(
         controller: widget.controller,
-        textCapitalization: TextCapitalization.words,
+        maxLines: widget.isSubTopic ? null : 1,
+        keyboardType: widget.isSubTopic? TextInputType.multiline : null,
+        textInputAction: TextInputAction.next,
+        textCapitalization: TextCapitalization.sentences,
         cursorColor: Color(0xff1f1f1f),
-        scrollPadding: EdgeInsets.only(bottom: 40),
+        scrollPadding: EdgeInsets.all(100),
         style: GoogleFonts.questrial(
           letterSpacing: 0.5,
           fontSize: 15,

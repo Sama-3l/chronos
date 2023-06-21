@@ -223,49 +223,52 @@ class _HomePageState extends State<HomePage> {
                 toolbarHeight: 100,
                 elevation: 0,
                 backgroundColor: Colors.transparent),
-            body: BlocBuilder<ChangeRemindersBloc, ChangeRemindersState>(
-              builder: (context, state) {
-                taskList = wd.currentDayTasks(
-                    weekObject,
-                    weekSelectedIndex,
-                    selectedDay,
-                    allReminders,
-                    context,
-                    appStartDate,
-                    count,
-                    db,
-                    notificationID);
-                return CustomScrollView(controller: _controller, slivers: [
-                  SliverAppBar(
-                    pinned: true,
-                    backgroundColor: col.appColor,
-                    elevation: 0,
-                    toolbarHeight: 70,
-                    titleSpacing: 0,
-                    title: ListOfWeeks(
-                        weekObject: weekObject,
-                        col: col,
-                        selectedDay: selectedDay,
-                        controller: controller,
-                        weekSelectedIndex: weekSelectedIndex),
-                  ),
-                  SliverPersistentHeader(
-                      pinned: sliverPersistentHeader,
-                      delegate: DayOfWeek(
-                          thisWeek: weekDays,
-                          currentWeekMap: weekObject.weeks[weekSelectedIndex],
-                          maxheight: MediaQuery.of(context).size.height * 0.2,
-                          minheight:
-                              MediaQuery.of(context).size.height * 0.13)),
-                  SliverFixedExtentList(
-                      delegate: SliverChildListDelegate(taskList),
-                      itemExtent: MediaQuery.of(context).size.height * 0.28)
-                ]);
-              },
+            body: Padding(
+              padding: const EdgeInsets.only(bottom: 30),
+              child: BlocBuilder<ChangeRemindersBloc, ChangeRemindersState>(
+                builder: (context, state) {
+                  taskList = wd.currentDayTasks(
+                      weekObject,
+                      weekSelectedIndex,
+                      selectedDay,
+                      allReminders,
+                      context,
+                      appStartDate,
+                      count,
+                      db,
+                      notificationID);
+                  return CustomScrollView(controller: _controller, slivers: [
+                    SliverAppBar(
+                      pinned: true,
+                      backgroundColor: col.appColor,
+                      elevation: 0,
+                      toolbarHeight: 70,
+                      titleSpacing: 0,
+                      title: ListOfWeeks(
+                          weekObject: weekObject,
+                          col: col,
+                          selectedDay: selectedDay,
+                          controller: controller,
+                          weekSelectedIndex: weekSelectedIndex),
+                    ),
+                    SliverPersistentHeader(
+                        pinned: sliverPersistentHeader,
+                        delegate: DayOfWeek(
+                            thisWeek: weekDays,
+                            currentWeekMap: weekObject.weeks[weekSelectedIndex],
+                            maxheight: MediaQuery.of(context).size.height * 0.2,
+                            minheight:
+                                MediaQuery.of(context).size.height * 0.13)),
+                    SliverFixedExtentList(
+                        delegate: SliverChildListDelegate(taskList),
+                        itemExtent: MediaQuery.of(context).size.height * 0.28)
+                  ]);
+                },
+              ),
             ),
             floatingActionButton: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.088,
-                width: MediaQuery.of(context).size.height * 0.088,
+                height: MediaQuery.of(context).size.height * 0.072,
+                width: MediaQuery.of(context).size.height * 0.072,
                 child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(

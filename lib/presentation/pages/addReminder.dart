@@ -138,6 +138,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
   }
 
   bool value = false;
+  ScrollController controller = ScrollController();
   TextEditingController tag1Controller = TextEditingController();
   TextEditingController tag2Controller = TextEditingController();
   TextEditingController subtitleController = TextEditingController();
@@ -179,18 +180,31 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 5),
+                child: IconButton(
+                    onPressed: () {
+                      topicsController.removeAt(0);
+                      subtopicsController[0] = [];
+                      BlocProvider.of<ChangeTopicsBloc>(context)
+                          .add(TopicsChangedEvent());
+                    },
+                    icon: Icon(Icons.delete, size: 25)),
+              ),
               Expanded(
                 child: InputField(
                     controller: topicsController[0],
                     hintText: 'Add text...',
-                    left: 40,
+                    left: 5,
                     right: 10),
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 5),
                 child: IconButton(
                     onPressed: () {
-                      subtopicsController[0] = [];
+                      if (subtopicsController[0] == null) {
+                        subtopicsController[0] = [];
+                      }
                       subtopicsController[0]!.add(TextEditingController());
                       BlocProvider.of<ChangeTopicsBloc>(context)
                           .add(TopicsChangedEvent());
@@ -207,11 +221,22 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 5),
+                child: IconButton(
+                    onPressed: () {
+                      topicsController.removeAt(i);
+                      subtopicsController[i] = [];
+                      BlocProvider.of<ChangeTopicsBloc>(context)
+                          .add(TopicsChangedEvent());
+                    },
+                    icon: Icon(Icons.delete, size: 25)),
+              ),
               Expanded(
                 child: InputField(
                     controller: topicsController[i],
                     hintText: 'Add text...',
-                    left: 40,
+                    left: 5,
                     right: 10),
               ),
               Padding(
@@ -253,6 +278,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                 Expanded(
                   child: InputField(
                       controller: subtopicsController[i]![j],
+                      isSubTopic: true,
                       hintText: '/subtopic',
                       left: 5,
                       right: 15),
@@ -264,43 +290,16 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
       }
     }
 
-    topicsController.isNotEmpty
-        ? topics.add(Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: IconButton(
-                    onPressed: () {
-                      topicsController.add(TextEditingController());
-                      BlocProvider.of<ChangeTopicsBloc>(context)
-                          .add(TopicsChangedEvent());
-                    },
-                    icon: Icon(Icons.add_circle_outline_rounded, size: 28)),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 5, right: 10),
-                child: IconButton(
-                    onPressed: () {
-                      topicsController.removeLast();
-                      subtopicsController[topicsController.length] = [];
-                      BlocProvider.of<ChangeTopicsBloc>(context)
-                          .add(TopicsChangedEvent());
-                    },
-                    icon: Icon(Icons.delete, size: 28)),
-              ),
-            ],
-          ))
-        : topics.add(Padding(
-            padding: const EdgeInsets.only(top: 5),
-            child: IconButton(
-                onPressed: () {
-                  topicsController.add(TextEditingController());
-                  BlocProvider.of<ChangeTopicsBloc>(context)
-                      .add(TopicsChangedEvent());
-                },
-                icon: Icon(Icons.add_circle_outline_rounded, size: 28)),
-          ));
+    topics.add(Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: IconButton(
+          onPressed: () {
+            topicsController.add(TextEditingController());
+            BlocProvider.of<ChangeTopicsBloc>(context)
+                .add(TopicsChangedEvent());
+          },
+          icon: Icon(Icons.add_circle_outline_rounded, size: 28)),
+    ));
 
     return topics;
   }
@@ -459,314 +458,346 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                       height: MediaQuery.of(context).size.height,
                     ),
                   ),
-                  Padding(
-                      padding: EdgeInsets.only(right: 15, left: 15, bottom: 20),
-                      child: SingleChildScrollView(child:
-                          BlocBuilder<ToggleButtonsBloc, ToggleButtonsState>(
-                        builder: (context, state) {
-                          return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 40, left: 17, bottom: 10),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
+                  Scaffold(
+                    resizeToAvoidBottomInset: true,
+                    backgroundColor: Colors.transparent,
+                    body: Padding(
+                        padding:
+                            EdgeInsets.only(right: 15, left: 15, bottom: 20),
+                        child: SingleChildScrollView(
+                            controller: controller,
+                            child: BlocBuilder<ToggleButtonsBloc,
+                                ToggleButtonsState>(
+                              builder: (context, state) {
+                                return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
                                         children: [
-                                          AutoSizeText(
-                                            "Title",
-                                            style: GoogleFonts.questrial(
-                                                fontSize: 27,
-                                                color: Color(0xff1f1f1f)),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 40, left: 17, bottom: 10),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                AutoSizeText(
+                                                  "Title",
+                                                  style: GoogleFonts.questrial(
+                                                      fontSize: 27,
+                                                      color: Color(0xff1f1f1f)),
+                                                ),
+                                                AutoSizeText(
+                                                  "(Suggesting that you fill this)",
+                                                  style: GoogleFonts.questrial(
+                                                      fontSize: 2,
+                                                      color: Color(0xff1f1f1f)),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                          AutoSizeText(
-                                            "(Suggesting that you fill this)",
-                                            style: GoogleFonts.questrial(
-                                                fontSize: 2,
-                                                color: Color(0xff1f1f1f)),
-                                          ),
+                                          Spacer(),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 5, right: 5, bottom: 20),
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                if (widget.edit) {
+                                                  if (originalDeadlineType ==
+                                                      'none') {
+                                                    func.deleteAllNone(
+                                                        widget.currentReminder,
+                                                        widget.weekObject,
+                                                        widget.currentReminder
+                                                                .allReminders[
+                                                            widget
+                                                                .reminderIndex]);
+                                                  }
+                                                }
+                                                func.submit(
+                                                    widget.currentReminder,
+                                                    widget.reminderIndex,
+                                                    submitReady,
+                                                    tag1Controller,
+                                                    tag2Controller,
+                                                    subtitleController,
+                                                    topicsController,
+                                                    subtopicsController,
+                                                    widget.edit,
+                                                    widget.weekObject,
+                                                    widget.initialDate,
+                                                    context,
+                                                    db,
+                                                    widget.weekSelectedIndex,
+                                                    widget.id);
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: BlocBuilder<FixErrorBloc,
+                                                  FixErrorState>(
+                                                builder: (context, state) {
+                                                  return Container(
+                                                      width: 65,
+                                                      height: 65,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color: submitReady
+                                                            ? Color(0xffffffff)
+                                                            : Color(0xffdadada),
+                                                      ),
+                                                      child: Icon(
+                                                          Icons.done_rounded,
+                                                          size: 45));
+                                                },
+                                              ),
+                                            ),
+                                          )
                                         ],
                                       ),
-                                    ),
-                                    Spacer(),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 5, right: 5, bottom: 20),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          if (widget.edit) {
-                                            if (originalDeadlineType ==
-                                                'none') {
-                                              func.deleteAllNone(
-                                                  widget.currentReminder,
-                                                  widget.weekObject,
-                                                  widget.currentReminder
-                                                          .allReminders[
-                                                      widget.reminderIndex]);
-                                            }
-                                          }
-                                          func.submit(
-                                              widget.currentReminder,
-                                              widget.reminderIndex,
-                                              submitReady,
-                                              tag1Controller,
-                                              tag2Controller,
-                                              subtitleController,
-                                              topicsController,
-                                              subtopicsController,
-                                              widget.edit,
-                                              widget.weekObject,
-                                              widget.initialDate,
-                                              context,
-                                              db,
-                                              widget.weekSelectedIndex,
-                                              widget.id);
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: BlocBuilder<FixErrorBloc,
-                                            FixErrorState>(
-                                          builder: (context, state) {
-                                            return Container(
-                                                width: 65,
-                                                height: 65,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: submitReady
-                                                      ? Color(0xffffffff)
-                                                      : Color(0xffdadada),
-                                                ),
-                                                child: Icon(Icons.done_rounded,
-                                                    size: 45));
-                                          },
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 20),
+                                        child: InputField(
+                                            controller: tag1Controller,
+                                            hintText: 'Tag 1',
+                                            left: 20,
+                                            right: 20),
+                                      ),
+                                      InputField(
+                                          controller: tag2Controller,
+                                          hintText: 'Tag 2',
+                                          left: 20,
+                                          right: 20),
+                                      Padding(
+                                        padding: EdgeInsets.only(top: 60),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 17, bottom: 10),
+                                              child: Text(
+                                                "/subtitle:",
+                                                style: GoogleFonts.questrial(
+                                                    fontSize: 27,
+                                                    color: Color(0xff1f1f1f)),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: InputField(
+                                                  controller:
+                                                      subtitleController,
+                                                  hintText: '/subtitle',
+                                                  left: 10,
+                                                  right: 20),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    )
-                                  ],
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 20),
-                                  child: InputField(
-                                      controller: tag1Controller,
-                                      hintText: 'Tag 1',
-                                      left: 20,
-                                      right: 20),
-                                ),
-                                InputField(
-                                    controller: tag2Controller,
-                                    hintText: 'Tag 2',
-                                    left: 20,
-                                    right: 20),
-                                Padding(
-                                  padding: EdgeInsets.only(top: 60),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
+                                      BlocBuilder<ChangeTopicsBloc,
+                                          ChangeTopicsState>(
+                                        builder: (context, state) {
+                                          return widget
+                                                      .currentReminder
+                                                      .allReminders[
+                                                          widget.reminderIndex]
+                                                      .topics ==
+                                                  null
+                                              ? Center(
+                                                  child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children:
+                                                          getTopics(context)),
+                                                )
+                                              : Column(
+                                                  children: getTopics(context));
+                                        },
+                                      ),
                                       Padding(
                                         padding: const EdgeInsets.only(
-                                            left: 17, bottom: 10),
-                                        child: Text(
-                                          "/subtitle:",
+                                            top: 40, left: 17, bottom: 10),
+                                        child: AutoSizeText(
+                                          "Color Select",
                                           style: GoogleFonts.questrial(
                                               fontSize: 27,
                                               color: Color(0xff1f1f1f)),
                                         ),
                                       ),
-                                      Expanded(
-                                        child: InputField(
-                                            controller: subtitleController,
-                                            hintText: '/subtitle',
-                                            left: 10,
-                                            right: 20),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 10),
+                                        child: Row(
+                                            children: wd.getColors(
+                                                widget.currentReminder
+                                                        .allReminders[
+                                                    widget.reminderIndex],
+                                                col,
+                                                context)),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                BlocBuilder<ChangeTopicsBloc,
-                                    ChangeTopicsState>(
-                                  builder: (context, state) {
-                                    return widget
-                                                .currentReminder
-                                                .allReminders[
-                                                    widget.reminderIndex]
-                                                .topics ==
-                                            null
-                                        ? Center(
-                                            child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: getTopics(context)),
-                                          )
-                                        : Column(children: getTopics(context));
-                                  },
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 40, left: 17, bottom: 10),
-                                  child: AutoSizeText(
-                                    "Color Select",
-                                    style: GoogleFonts.questrial(
-                                        fontSize: 27, color: Color(0xff1f1f1f)),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10),
-                                  child: Row(
-                                      children: wd.getColors(
-                                          widget.currentReminder.allReminders[
-                                              widget.reminderIndex],
-                                          col,
-                                          context)),
-                                ),
-                                Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(top: 60),
-                                    child: ToggleButtons(
-                                      isSelected: isSelected,
-                                      selectedColor: Color(0xffffffff),
-                                      fillColor: Color(0xff1f1f1f),
-                                      onPressed: (int index) {
-                                        changeToggleButtons(index);
-                                        BlocProvider.of<ToggleButtonsBloc>(
-                                                context)
-                                            .add(ButtonToggleEvent());
-                                      },
-                                      children: [
-                                        SizedBox(
-                                          width: (MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  70) /
-                                              4,
-                                          child: Center(
-                                            child: Text(
-                                              "None",
-                                              style: GoogleFonts.questrial(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: (MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  70) /
-                                              4,
-                                          child: Center(
-                                            child: Text(
-                                              "In Week",
-                                              style: GoogleFonts.questrial(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: (MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  70) /
-                                              4,
-                                          child: Center(
-                                            child: Text(
-                                              "On",
-                                              style: GoogleFonts.questrial(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: (MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  70) /
-                                              4,
-                                          child: Center(
-                                            child: Text(
-                                              "Before",
-                                              style: GoogleFonts.questrial(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                func.checkOnOrBefore(widget.currentReminder)
-                                    ? BlocBuilder<DateSelectedBloc,
-                                        DateSelectedState>(
-                                        builder: (context, state) {
-                                          return Padding(
-                                              padding: EdgeInsets.only(
-                                                  top: 25,
-                                                  left: 60,
-                                                  right: 60,
-                                                  bottom: 20),
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  if (widget.edit) {
-                                                    time.editDate(
-                                                        context,
-                                                        widget.initialDate,
-                                                        widget.currentReminder,
-                                                        widget.selectedDay);
-                                                  } else {
-                                                    time.selectDate(
-                                                        context,
-                                                        widget.initialDate,
-                                                        widget.currentReminder,
-                                                        widget.selectedDay);
-                                                  }
-                                                },
-                                                child: AspectRatio(
-                                                  aspectRatio: 5,
-                                                  child: Container(
-                                                      decoration: BoxDecoration(
-                                                          color:
-                                                              Color(0xff1f1f1f),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      50)),
-                                                      child: Center(
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                      .only(
-                                                                  left: 10,
-                                                                  right: 10),
-                                                          child: AutoSizeText(
-                                                            widget.edit
-                                                                ? func.getSelectedDate(widget
-                                                                    .currentReminder
-                                                                    .allReminders[
-                                                                        widget
-                                                                            .reminderIndex]
-                                                                    .deadline)
-                                                                : func.getSelectedDate(widget
-                                                                    .selectedDay
-                                                                    .selectedDay),
-                                                            maxLines: 1,
-                                                            style: GoogleFonts
-                                                                .questrial(
-                                                                    fontSize:
-                                                                        20,
-                                                                    color: Color(
-                                                                        0xffffffff)),
-                                                          ),
-                                                        ),
-                                                      )),
+                                      Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.only(top: 60),
+                                          child: ToggleButtons(
+                                            isSelected: isSelected,
+                                            selectedColor: Color(0xffffffff),
+                                            fillColor: Color(0xff1f1f1f),
+                                            onPressed: (int index) {
+                                              changeToggleButtons(index);
+                                              BlocProvider.of<
+                                                          ToggleButtonsBloc>(
+                                                      context)
+                                                  .add(ButtonToggleEvent());
+                                            },
+                                            children: [
+                                              SizedBox(
+                                                width: (MediaQuery.of(context)
+                                                            .size
+                                                            .width -
+                                                        70) /
+                                                    4,
+                                                child: Center(
+                                                  child: Text(
+                                                    "None",
+                                                    style:
+                                                        GoogleFonts.questrial(
+                                                            fontSize: 16),
+                                                  ),
                                                 ),
-                                              ));
-                                        },
-                                      )
-                                    : Padding(
-                                        padding: EdgeInsets.only(bottom: 20))
-                              ]);
-                        },
-                      ))),
+                                              ),
+                                              SizedBox(
+                                                width: (MediaQuery.of(context)
+                                                            .size
+                                                            .width -
+                                                        70) /
+                                                    4,
+                                                child: Center(
+                                                  child: Text(
+                                                    "In Week",
+                                                    style:
+                                                        GoogleFonts.questrial(
+                                                            fontSize: 16),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: (MediaQuery.of(context)
+                                                            .size
+                                                            .width -
+                                                        70) /
+                                                    4,
+                                                child: Center(
+                                                  child: Text(
+                                                    "On",
+                                                    style:
+                                                        GoogleFonts.questrial(
+                                                            fontSize: 16),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: (MediaQuery.of(context)
+                                                            .size
+                                                            .width -
+                                                        70) /
+                                                    4,
+                                                child: Center(
+                                                  child: Text(
+                                                    "Before",
+                                                    style:
+                                                        GoogleFonts.questrial(
+                                                            fontSize: 16),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      func.checkOnOrBefore(
+                                              widget.currentReminder)
+                                          ? BlocBuilder<DateSelectedBloc,
+                                              DateSelectedState>(
+                                              builder: (context, state) {
+                                                return Padding(
+                                                    padding: EdgeInsets.only(
+                                                        top: 25,
+                                                        left: 60,
+                                                        right: 60,
+                                                        bottom: 20),
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        if (widget.edit) {
+                                                          time.editDate(
+                                                              context,
+                                                              widget
+                                                                  .initialDate,
+                                                              widget
+                                                                  .currentReminder,
+                                                              widget
+                                                                  .selectedDay);
+                                                        } else {
+                                                          time.selectDate(
+                                                              context,
+                                                              widget
+                                                                  .initialDate,
+                                                              widget
+                                                                  .currentReminder,
+                                                              widget
+                                                                  .selectedDay);
+                                                        }
+                                                      },
+                                                      child: AspectRatio(
+                                                        aspectRatio: 5,
+                                                        child: Container(
+                                                            decoration: BoxDecoration(
+                                                                color: Color(
+                                                                    0xff1f1f1f),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            50)),
+                                                            child: Center(
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                            .only(
+                                                                        left:
+                                                                            10,
+                                                                        right:
+                                                                            10),
+                                                                child:
+                                                                    AutoSizeText(
+                                                                  widget.edit
+                                                                      ? func.getSelectedDate(widget
+                                                                          .currentReminder
+                                                                          .allReminders[widget
+                                                                              .reminderIndex]
+                                                                          .deadline)
+                                                                      : func.getSelectedDate(widget
+                                                                          .selectedDay
+                                                                          .selectedDay),
+                                                                  maxLines: 1,
+                                                                  style: GoogleFonts.questrial(
+                                                                      fontSize:
+                                                                          20,
+                                                                      color: Color(
+                                                                          0xffffffff)),
+                                                                ),
+                                                              ),
+                                                            )),
+                                                      ),
+                                                    ));
+                                              },
+                                            )
+                                          : Padding(
+                                              padding:
+                                                  EdgeInsets.only(bottom: 20))
+                                    ]);
+                              },
+                            ))),
+                  ),
                 ]),
               ),
             ],
