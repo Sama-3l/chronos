@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:async';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:chronos/algorithms/methods.dart';
 import 'package:chronos/constants/colors.dart';
@@ -283,6 +285,37 @@ class WidgetDecider {
               ),
             ),
             onDismissed: (direction) {
+              int indexInAllReminders = allReminders.allReminders
+                  .indexOf(currentWeek.reminders.allReminders[j]);
+              Reminder deletedReminder = allReminders.allReminders[allReminders
+                  .allReminders
+                  .indexOf(currentWeek.reminders.allReminders[j])];
+              showSnackbar(context).then((value) {
+                if (value) {
+                  allReminders.allReminders.insert(indexInAllReminders, deletedReminder);
+                  if (deletedReminder.deadlineType == 'none') {
+                    for (int i = 0; i < weekObject.weeks.length; i++) {
+                      weekObject.weeks[i].reminders.allReminders
+                          .add(deletedReminder);
+                    }
+                  } else {
+                    weekObject
+                        .weeks[func.calculateWeekIndex(
+                                deletedReminder.deadline, appStartDate) -
+                            1]
+                        .reminders
+                        .allReminders
+                        .add(deletedReminder);
+                  }
+                  func.setNotifications(deletedReminder, appStartDate, weekObject, id, false);
+                  BlocProvider.of<ChangeRemindersBloc>(context)
+                      .add(AddRemindersEvent());
+                  db.putAll({
+                    'reminders': allReminders,
+                    'notifications': id.notificationID
+                  });
+                }
+              });
               func.cancelNotifications(allReminders.allReminders[allReminders
                   .allReminders
                   .indexOf(currentWeek.reminders.allReminders[j])]);
@@ -405,7 +438,7 @@ class WidgetDecider {
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                      color: Color(0xffB793DA),
+                      color: reminder.color,
                       border: Border.all(color: Colors.black),
                       borderRadius: BorderRadius.circular(5)),
                   child: Padding(
@@ -474,5 +507,31 @@ class WidgetDecider {
     }
 
     return popUpTopics;
+  }
+
+  Future<bool> showSnackbar(BuildContext context) {
+    final completer = Completer<bool>();
+    bool buttonPressed = false; // Track if the button was pressed
+
+    final snackBar = SnackBar(
+      content: Text('Would you like that reminder back?'),
+      duration: Duration(seconds: 3),
+      action: SnackBarAction(
+        label: 'Yes Please',
+        onPressed: () {
+          buttonPressed = true;
+          completer.complete(true); // Button pressed, complete with true
+        },
+      ),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar).closed.then((_) {
+      if (!buttonPressed) {
+        completer.complete(
+            false); // Snackbar closed without button press, complete with false
+      }
+    });
+
+    return completer.future;
   }
 }

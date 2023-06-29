@@ -13,6 +13,7 @@ import 'package:chronos/data/model/hive_week.dart';
 import 'package:chronos/data/repositories/hive_allReminders.dart';
 import 'package:chronos/data/repositories/hive_weeks.dart';
 import 'package:chronos/presentation/pages/addReminder.dart';
+import 'package:chronos/presentation/pages/settings.dart';
 import 'package:chronos/presentation/widgets/daysOfWeek.dart';
 import 'package:chronos/presentation/widgets/listOfWeeks.dart';
 import 'package:chronos/presentation/widgets/taskCard.dart';
@@ -200,25 +201,17 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 actions: [
-                  GestureDetector(
-                    onTap: () {
-                      NotificationService notify = NotificationService();
-                      notify.cancelAll();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 15, left: 15, right: 15, bottom: 15),
-                      child: Container(
-                        height: 70,
-                        width: 70,
-                        decoration: BoxDecoration(
-                            color: col.whiteFieldColor,
-                            borderRadius: BorderRadius.circular(70)),
-                        child: Icon(Icons.notifications_off_rounded,
-                            size: 35, color: Color(0xff1f1f1f)),
-                      ),
-                    ),
-                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: IconButton(
+                        onPressed: () {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) {
+                            return Settings();
+                          }));
+                        },
+                        icon: Icon(Icons.settings_sharp, size: 30)),
+                  )
                 ],
                 toolbarHeight: 100,
                 elevation: 0,

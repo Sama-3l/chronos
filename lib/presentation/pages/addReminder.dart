@@ -86,6 +86,7 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
       editTaskCard = true;
       tag1Controller.text = obj.tag1;
       tag2Controller.text = obj.tag2;
+      subtitleController.text = obj.subtitle;
       late int index;
       if (obj.deadlineType == 'none') {
         index = 0;
@@ -598,21 +599,11 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                       BlocBuilder<ChangeTopicsBloc,
                                           ChangeTopicsState>(
                                         builder: (context, state) {
-                                          return widget
-                                                      .currentReminder
-                                                      .allReminders[
-                                                          widget.reminderIndex]
-                                                      .topics ==
-                                                  null
-                                              ? Center(
-                                                  child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children:
-                                                          getTopics(context)),
-                                                )
-                                              : Column(
-                                                  children: getTopics(context));
+                                          return Center(
+                                            child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: getTopics(context)),
+                                          );
                                         },
                                       ),
                                       Padding(
@@ -769,15 +760,12 @@ class _AddReminderDescriptiveState extends State<AddReminderDescriptive> {
                                                                             10),
                                                                 child:
                                                                     AutoSizeText(
-                                                                  widget.edit
-                                                                      ? func.getSelectedDate(widget
-                                                                          .currentReminder
-                                                                          .allReminders[widget
+                                                                  func.getSelectedDate(widget
+                                                                      .currentReminder
+                                                                      .allReminders[
+                                                                          widget
                                                                               .reminderIndex]
-                                                                          .deadline)
-                                                                      : func.getSelectedDate(widget
-                                                                          .selectedDay
-                                                                          .selectedDay),
+                                                                      .deadline),
                                                                   maxLines: 1,
                                                                   style: GoogleFonts.questrial(
                                                                       fontSize:
