@@ -22,22 +22,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-Future<void> main() async{
-  WidgetsFlutterBinding.ensureInitialized();
-  LicenseRegistry.addLicense(() async* {
-    final license = await rootBundle.loadString('google_fonts/OFL.txt');
-    yield LicenseEntryWithLineBreaks(['google_fonts'], license);
-  });
-  Hive.registerAdapter(ColorAdapter());
-  Hive.registerAdapter(DateTimeAdapter());
-  Hive.registerAdapter(ReminderAdapter());
-  Hive.registerAdapter(TopicAdapter());
-  Hive.registerAdapter(WeekAdapter());
-  Hive.registerAdapter(RemindersAdapter());
-  Hive.registerAdapter(WeeksAdapter());
+Future<void> main() async {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // Hive.registerAdapter(ColorAdapter());
+  // Hive.registerAdapter(DateTimeAdapter());
+  // Hive.registerAdapter(ReminderAdapter());
+  // Hive.registerAdapter(TopicAdapter());
+  // Hive.registerAdapter(WeekAdapter());
+  // Hive.registerAdapter(RemindersAdapter());
+  // Hive.registerAdapter(WeeksAdapter());
 
-  await Hive.initFlutter();
-  await Hive.openBox('Database');
+  // await Hive.initFlutter();
+  // await Hive.openBox('Database');
   runApp(const MyApp());
 }
 

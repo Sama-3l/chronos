@@ -13,8 +13,7 @@ import '../data/model/selectedDay.dart';
 
 class TimeNow {
   Weeks initializeWeeks(DateTime start) {
-    return getWeeksForRange(DateTime(start.year, start.month, start.day),
-        DateTime(start.year + 2, start.month, start.day));
+    return getWeeksForRange(DateTime(start.year, start.month, start.day), DateTime(start.year + 2, start.month, start.day));
   }
 
   Weeks getWeeksForRange(DateTime start, DateTime end) {
@@ -37,13 +36,7 @@ class TimeNow {
 
       if (date.weekday == 7) {
         sunday = date;
-        weekObject.weeks.add(Week(
-            monday: monday,
-            sunday: sunday,
-            selected: false,
-            reminders: Reminders(allReminders: []),
-            week:
-                "Week ${monday.day.toString().padLeft(2, '0')} - ${sunday.day.toString().padLeft(2, '0')}"));
+        weekObject.weeks.add(Week(monday: monday, sunday: sunday, selected: false, reminders: Reminders(allReminders: []), week: "Week ${monday.day.toString().padLeft(2, '0')} - ${sunday.day.toString().padLeft(2, '0')}"));
         p++;
       }
       date = date.add(const Duration(days: 1));
@@ -52,77 +45,74 @@ class TimeNow {
     return weekObject;
   }
 
-  Future<void> selectDate(BuildContext context, DateTime initialDate,
-      Reminders currentReminder, SelectedDay selectedDay) async {
+  Future<void> selectDate(BuildContext context, DateTime initialDate, Reminders currentReminder, SelectedDay selectedDay) async {
     DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDay.selectedDay,
       firstDate: DateTime(2022),
       lastDate: DateTime(2027),
       builder: (context, child) {
-      return Theme(
-        data: Theme.of(context).copyWith(
-          dialogBackgroundColor: Colors.grey[800],
-          colorScheme: ColorScheme.light(
-            primary: currentReminder.allReminders[currentReminder.allReminders.length - 1].color, // <-- SEE HERE
-            onPrimary: Colors.white, // <-- SEE HERE
-            onSurface: Colors.white, // <-- SEE HERE
-          ),
-          textButtonTheme: TextButtonThemeData(
-            style: TextButton.styleFrom(
-              primary: Colors.white, // button text color
+        return Theme(
+          data: Theme.of(context).copyWith(
+            dialogBackgroundColor: Colors.grey[800],
+            colorScheme: ColorScheme.light(
+              primary: currentReminder.allReminders[currentReminder.allReminders.length - 1].color, // <-- SEE HERE
+              onPrimary: Colors.white, // <-- SEE HERE
+              onSurface: Colors.white, // <-- SEE HERE
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                // primary: Colors.white, // button text color
+              ),
             ),
           ),
-        ),
-        child: child!,
-      );
-    },
+          child: child!,
+        );
+      },
       selectableDayPredicate: (DateTime date) {
         return date.isAfter(initialDate.subtract(Duration(days: 1)));
       },
     );
 
     if (picked != null) {
-      currentReminder.allReminders[currentReminder.allReminders.length - 1]
-          .deadline = picked;
+      currentReminder.allReminders[currentReminder.allReminders.length - 1].deadline = picked;
     }
 
     BlocProvider.of<DateSelectedBloc>(context).add(DateChangedEvent());
   }
 
-  Future<void> editDate(BuildContext context, DateTime initialDate,
-      Reminders currentReminder, SelectedDay selectedDay) async {
+  Future<void> editDate(BuildContext context, DateTime initialDate, Reminders currentReminder, SelectedDay selectedDay) async {
     DateTime? picked = await showDatePicker(
       context: context,
       initialDate: currentReminder.allReminders[currentReminder.allReminders.length - 1].deadline,
       firstDate: DateTime(2022),
       lastDate: DateTime(2027),
       builder: (context, child) {
-      return Theme(
-        data: Theme.of(context).copyWith(
-          dialogBackgroundColor: Colors.grey[800],
-          colorScheme: ColorScheme.light(
-            primary: currentReminder.allReminders[currentReminder.allReminders.length - 1].color, // <-- SEE HERE
-            onPrimary: Colors.white, // <-- SEE HERE
-            onSurface: Colors.white, // <-- SEE HERE
-          ),
-          textButtonTheme: TextButtonThemeData(
-            style: TextButton.styleFrom(
-              primary: Colors.white, // button text color
+        return Theme(
+          data: Theme.of(context).copyWith(
+            dialogBackgroundColor: Colors.grey[800],
+            colorScheme: ColorScheme.light(
+              primary: currentReminder.allReminders[currentReminder.allReminders.length - 1].color, // <-- SEE HERE
+              onPrimary: Colors.white, // <-- SEE HERE
+              onSurface: Colors.white, // <-- SEE HERE
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+              ),
             ),
           ),
-        ),
-        child: child!,
-      );
-    },
+          child: child!,
+        );
+      },
       selectableDayPredicate: (DateTime date) {
         return date.isAfter(initialDate.subtract(Duration(days: 1)));
       },
     );
 
     if (picked != null) {
-      currentReminder.allReminders[currentReminder.allReminders.length - 1]
-          .deadline = picked;
+      currentReminder.allReminders[currentReminder.allReminders.length - 1].deadline = picked;
     }
 
     BlocProvider.of<DateSelectedBloc>(context).add(DateChangedEvent());

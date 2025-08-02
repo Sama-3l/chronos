@@ -63,11 +63,9 @@ class _HomePageState extends State<HomePage> {
   late SelectedDay selectedDay;
   late int currentWeekIndex;
 
-  DateTime appStartDate =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  DateTime appStartDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
-  DateTime currentStartDate =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  DateTime currentStartDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
   void initialize() {
     notificationID.notificationID = 0;
@@ -84,24 +82,26 @@ class _HomePageState extends State<HomePage> {
       notificationID.notificationID = db.get('notifications');
     }
     if (db.get('appOpenCount') < 10000) {
-      db.putAll({'appOpenCount': db.get('appOpenCount') + 1});
+      db.putAll({
+        'appOpenCount': db.get('appOpenCount') + 1
+      });
     }
 
     weekObject = time.initializeWeeks(appStartDate);
 
     func.initializeWeeklyReminders(allReminders, weekObject);
 
-    weekSelectedIndex =
-        func.calculateWeekIndex(currentStartDate, appStartDate) - 1;
+    weekSelectedIndex = func.calculateWeekIndex(currentStartDate, appStartDate) - 1;
 
     if (appStartDate != func.changeInitialDate(weekObject, appStartDate)) {
       appStartDate = func.changeInitialDate(weekObject, appStartDate);
-      db.putAll({'initialDate': appStartDate});
+      db.putAll({
+        'initialDate': appStartDate
+      });
     }
     currentWeekIndex = weekSelectedIndex;
 
-    selectedDay = SelectedDay(
-        selectedDay: currentStartDate, selectedWeekIndex: weekSelectedIndex);
+    selectedDay = SelectedDay(selectedDay: currentStartDate, selectedWeekIndex: weekSelectedIndex);
 
     weekObject.weeks[weekSelectedIndex].selected = true;
 
@@ -116,8 +116,7 @@ class _HomePageState extends State<HomePage> {
         });
       }
     });
-    weekDays = func.selectedWeek(
-        selectedDay, weekObject, weekSelectedIndex, selectedDay);
+    weekDays = func.selectedWeek(selectedDay, weekObject, weekSelectedIndex, selectedDay);
   }
 
   @override
@@ -133,29 +132,10 @@ class _HomePageState extends State<HomePage> {
         if (state is WeekChangeState) {
           selectedDay = state.selectedDay!;
           weekSelectedIndex = selectedDay.selectedWeekIndex;
-          weekDays = func.selectedWeek(
-              state.selectedDay, weekObject, weekSelectedIndex, selectedDay);
-          taskList = wd.currentDayTasks(
-              weekObject,
-              weekSelectedIndex,
-              selectedDay,
-              allReminders,
-              context,
-              appStartDate,
-              count,
-              db,
-              notificationID);
+          weekDays = func.selectedWeek(state.selectedDay, weekObject, weekSelectedIndex, selectedDay);
+          taskList = wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay, allReminders, context, appStartDate, count, db, notificationID);
         } else {
-          taskList = wd.currentDayTasks(
-              weekObject,
-              weekSelectedIndex,
-              selectedDay,
-              allReminders,
-              context,
-              appStartDate,
-              count,
-              db,
-              notificationID);
+          taskList = wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay, allReminders, context, appStartDate, count, db, notificationID);
         }
         return Scaffold(
             backgroundColor: col.appColor,
@@ -164,37 +144,25 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     TextButton(
                       onPressed: () {},
-                      child: Text(
-                          DateFormat.MMMMd().format(selectedDay.selectedDay),
-                          style: GoogleFonts.questrial(
-                              fontSize: 19, color: col.whiteTextColor)),
+                      child: Text(DateFormat.MMMMd().format(selectedDay.selectedDay), style: GoogleFonts.questrial(fontSize: 19, color: col.whiteTextColor)),
                     ),
                     Container(
                       height: 4,
                       width: 4,
-                      decoration: BoxDecoration(
-                          color: col.dotColor,
-                          borderRadius: BorderRadius.circular(10)),
+                      decoration: BoxDecoration(color: col.dotColor, borderRadius: BorderRadius.circular(10)),
                     ),
                     TextButton(
                       onPressed: () {
-                        weekObject.weeks[selectedDay.selectedWeekIndex]
-                            .selected = false;
+                        weekObject.weeks[selectedDay.selectedWeekIndex].selected = false;
                         selectedDay.selectedDay = currentStartDate;
                         selectedDay.selectedWeekIndex = currentWeekIndex;
                         weekObject.weeks[currentWeekIndex].selected = true;
                         selectedDay.selectedWeekIndex = currentWeekIndex;
-                        BlocProvider.of<ChangeWeekBloc>(context)
-                            .add(WeekChangeEvent(selectedDay: selectedDay));
+                        BlocProvider.of<ChangeWeekBloc>(context).add(WeekChangeEvent(selectedDay: selectedDay));
                       },
                       child: FittedBox(
                         fit: BoxFit.fitWidth,
-                        child: Text(
-                            func.checkTodayStatus(
-                                selectedDay, currentStartDate),
-                            style: GoogleFonts.questrial(
-                                fontSize: 19,
-                                color: col.whiteTextColor.withOpacity(0.7))),
+                        child: Text(func.checkTodayStatus(selectedDay, currentStartDate), style: GoogleFonts.questrial(fontSize: 19, color: col.whiteTextColor.withOpacity(0.7))),
                       ),
                     ),
                     Expanded(child: Container())
@@ -205,8 +173,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.only(right: 20),
                     child: IconButton(
                         onPressed: () {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) {
+                          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                             return Settings();
                           }));
                         },
@@ -220,16 +187,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(bottom: 30),
               child: BlocBuilder<ChangeRemindersBloc, ChangeRemindersState>(
                 builder: (context, state) {
-                  taskList = wd.currentDayTasks(
-                      weekObject,
-                      weekSelectedIndex,
-                      selectedDay,
-                      allReminders,
-                      context,
-                      appStartDate,
-                      count,
-                      db,
-                      notificationID);
+                  taskList = wd.currentDayTasks(weekObject, weekSelectedIndex, selectedDay, allReminders, context, appStartDate, count, db, notificationID);
                   return CustomScrollView(controller: _controller, slivers: [
                     SliverAppBar(
                       pinned: true,
@@ -237,24 +195,10 @@ class _HomePageState extends State<HomePage> {
                       elevation: 0,
                       toolbarHeight: 70,
                       titleSpacing: 0,
-                      title: ListOfWeeks(
-                          weekObject: weekObject,
-                          col: col,
-                          selectedDay: selectedDay,
-                          controller: controller,
-                          weekSelectedIndex: weekSelectedIndex),
+                      title: ListOfWeeks(weekObject: weekObject, col: col, selectedDay: selectedDay, controller: controller, weekSelectedIndex: weekSelectedIndex),
                     ),
-                    SliverPersistentHeader(
-                        pinned: sliverPersistentHeader,
-                        delegate: DayOfWeek(
-                            thisWeek: weekDays,
-                            currentWeekMap: weekObject.weeks[weekSelectedIndex],
-                            maxheight: MediaQuery.of(context).size.height * 0.2,
-                            minheight:
-                                MediaQuery.of(context).size.height * 0.13)),
-                    SliverFixedExtentList(
-                        delegate: SliverChildListDelegate(taskList),
-                        itemExtent: MediaQuery.of(context).size.height * 0.28)
+                    SliverPersistentHeader(pinned: sliverPersistentHeader, delegate: DayOfWeek(thisWeek: weekDays, currentWeekMap: weekObject.weeks[weekSelectedIndex], maxheight: MediaQuery.of(context).size.height * 0.2, minheight: MediaQuery.of(context).size.height * 0.13)),
+                    SliverFixedExtentList(delegate: SliverChildListDelegate(taskList), itemExtent: MediaQuery.of(context).size.height * 0.28)
                   ]);
                 },
               ),
@@ -263,23 +207,11 @@ class _HomePageState extends State<HomePage> {
                 height: MediaQuery.of(context).size.height * 0.072,
                 width: MediaQuery.of(context).size.height * 0.072,
                 child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(60)),
-                        backgroundColor: col.primaryTextColor),
+                    style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)), backgroundColor: col.primaryTextColor),
                     onPressed: () {
-                      allReminders.allReminders.add(Reminder(
-                          tag1: '',
-                          tag2: '',
-                          deadline: selectedDay.selectedDay,
-                          deadlineType: 'none',
-                          color: Color(0xffb793da),
-                          isDescriptive: true,
-                          subtitle: 'Topics',
-                          topics: null));
+                      allReminders.allReminders.add(Reminder(tag1: '', tag2: '', deadline: selectedDay.selectedDay, deadlineType: 'none', color: Color(0xffb793da), isDescriptive: true, subtitle: 'Topics', topics: null));
 
-                      Navigator.of(context)
-                          .push((MaterialPageRoute(builder: (context) {
+                      Navigator.of(context).push((MaterialPageRoute(builder: (context) {
                         return AddReminderDescriptive(
                           selectedDay: selectedDay,
                           currentReminder: allReminders,
@@ -290,8 +222,7 @@ class _HomePageState extends State<HomePage> {
                         );
                       })));
                     },
-                    child: Iconify(addReminder,
-                        size: MediaQuery.of(context).size.height * 0.08))));
+                    child: Iconify(addReminder, size: MediaQuery.of(context).size.height * 0.08))));
       },
     );
   }
