@@ -5,23 +5,17 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
 class NotificationService {
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'high_importance', 'reminders',
-      groupId: "Reminders");
+  AndroidNotificationChannel channel = AndroidNotificationChannel('high_importance', 'reminders', groupId: "Reminders");
 
   Future<void> initializeNotification() async {
-    AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@drawable/notifychronos');
-    InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@drawable/notifychronos');
+    InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> showNotification(
-      String title, String body, DateTime dateTime, int notificationID) async {
+  Future<void> showNotification(String title, String body, DateTime dateTime, int notificationID) async {
     tz.initializeTimeZones();
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
@@ -39,9 +33,7 @@ class NotificationService {
                 body,
               )),
         ),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        androidAllowWhileIdle: true,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.dateAndTime);
   }
 
